@@ -44,7 +44,7 @@ table.add_row(
     "5",
     "List available updates",
     "Shows packages that can be updated (safe read-only check).",
-    "apt list --upgrade"
+    "apt list --upgradable"
 )
 
 
@@ -81,7 +81,7 @@ def clean_apt_cache() -> None:
 def list_available_updates() -> None:
     """Function that lists available updates."""
     subprocess.run(
-        ["apt", "list", "--upgrade"],
+        ["apt", "list", "--upgradable"],
         universal_newlines=True
         )
 
