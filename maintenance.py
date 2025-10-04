@@ -2,6 +2,8 @@ from rich import print
 from rich.table import Table
 import subprocess
 
+__version__ = "0.0.1"
+
 # Script that provides reminders to perform certain regular maintenance
 # tasks on a Linux distribution.
 
