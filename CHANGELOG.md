@@ -12,13 +12,11 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Fixed
 
 - Fixed incorrect `--upgrade` flag to `--upgradable` in `list_available_updates()` function
-- Corrected apt command from `apt list --upgrade` to `apt list --upgradable`
 
 ### Added
 
 - Version management system with bump-my-version
 - Automated bump script for patch/minor/major releases
-- System-wide `bump` command for easy version management
 - VERSION file for version tracking
 
 ## [0.1] - 2025-10-04
