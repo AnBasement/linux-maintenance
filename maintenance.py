@@ -50,76 +50,45 @@ table.add_row(
 )
 
 
-# Subprocess function to update package lists
-def update_package_lists() -> None:
-    """Function that updates the package lists."""
-    subprocess.run(["sudo", "apt", "update"], universal_newlines=True)
+def run_command(cmd: list[str]) -> None:
+    """Execute a command and handle errors if any."""
+    try:
+        subprocess.run(cmd, check=True)
+    except subprocess.CalledProcessError as e:
+        print(
+            f"[red]Error: Command failed: {e.returncode}[/red]"
+            )
+    except FileNotFoundError:
+        print(f"[red]Command not found:[/red] {cmd[0]}")
 
 
-def upgrade_packages() -> None:
-    """Function that upgrades all packages."""
-    subprocess.run(
-        ["sudo", "apt", "upgrade", "-y"],
-        universal_newlines=True
-        )
-
-
-def remove_unused_packages() -> None:
-    """Function that removes unused packages."""
-    subprocess.run(
-        ["sudo", "apt", "autoremove", "-y"],
-        universal_newlines=True
-        )
-
-
-def clean_apt_cache() -> None:
-    """Function that cleans the apt cache."""
-    subprocess.run(
-        ["sudo", "apt", "clean"],
-        universal_newlines=True
-        )
-
-
-def list_available_updates() -> None:
-    """Function that lists available updates."""
-    subprocess.run(
-        ["apt", "list", "--upgradable"],
-        universal_newlines=True
-        )
-
-
-# Main function, prints the maintenance table.
 def main() -> None:
+    """Main function. Prints table and takes user input. Runs commands based
+    on input."""
     print(table)
     while True:
         selection = input(
             "Linux Maintenance\n"
             "=================\n"
             "Select which task to perform (1-5) or 'q' to quit: ")
-        if selection == "1":
-            update_package_lists()
-            continue
+        commands = {
+            "1": ["sudo", "apt", "update"],
+            "2": ["sudo", "apt", "upgrade", "-y"],
+            "3": ["sudo", "apt", "autoremove", "-y"],
+            "4": ["sudo", "apt", "clean"],
+            "5": ["apt", "list", "--upgradable"],
+        }
 
-        elif selection == "2":
-            upgrade_packages()
-            continue
-
-        elif selection == "3":
-            remove_unused_packages()
-            continue
-
-        elif selection == "4":
-            clean_apt_cache()
-            continue
-
-        elif selection == "5":
-            list_available_updates()
-            continue
+        if selection in commands:
+            run_command(commands[selection])
         elif selection.lower() == "q":
-            print("Exiting the maintenance script.")
+            print("Exiting...")
             break
         else:
-            print("Invalid selection. Please choose a number between 1 and 5.")
+            print(
+                "Invalid selection, please choose a number between 1 and 5 "
+                "or type q to quit."
+                )
 
 
 # Entry point for the script, runs main() if executed directly

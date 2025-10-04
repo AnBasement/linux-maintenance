@@ -1,9 +1,28 @@
+<!-- markdownlint-disable MD024 -->
 # Changelog
 
 All notable changes to the project will be documented here.
 
 The format is based on [Keep a Changelog v1.1.0](https://keepachangelog.com/en/1.1.0/),
 and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+---
+
+## [0.1.0] - 2025-10-04
+
+### Added
+
+- Error handling for command execution (catches `CalledProcessError` and `FileNotFoundError`)
+- Unified `run_command()` function to execute all maintenance commands
+
+### Changed
+
+- Refactored individual command functions into a single reusable function
+- Commands now stored in a dictionary for better maintainability
+
+### Removed
+
+- Individual functions for each maintenance task (`update_package_lists()`, `upgrade_packages()`, etc.)
 
 ---
 
