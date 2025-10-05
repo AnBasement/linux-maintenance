@@ -54,24 +54,19 @@ table.add_row(
 )
 
 
-def run_command(cmd: list[str]) -> int:
+def run_command(cmd: list[str]) -> tuple[int, str, str]:
     """Execute a command and handle errors if any. Returns exit code."""
     try:
-        subprocess.run(cmd, check=True)
-        return 0
-    except subprocess.CalledProcessError as e:
-        print(Panel.fit(
-            f"[red]✗ Error: Command failed, exit code {e.returncode}[/red]",
-            border_style="red"
+        result = subprocess.run(
+            cmd, capture_output=True, text=True, check=True
             )
-        )
-        return e.returncode
+        output = result.stdout.strip()
+        error = result.stderr.strip()
+        return (0, output, error)
+    except subprocess.CalledProcessError as e:
+        return (e.returncode, e.stdout.strip(), e.stderr.strip())
     except FileNotFoundError:
-        print(Panel.fit(
-            f"[red]✗ Command not found:[/red] {cmd[0]}",
-            border_style="red"
-            ))
-        return 1
+        return (127, "", f"Command not found: {cmd[0]}")
 
 
 def main() -> None:
