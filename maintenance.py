@@ -50,16 +50,19 @@ table.add_row(
 )
 
 
-def run_command(cmd: list[str]) -> None:
-    """Execute a command and handle errors if any."""
+def run_command(cmd: list[str]) -> int:
+    """Execute a command and handle errors if any. Returns exit code."""
     try:
         subprocess.run(cmd, check=True)
+        return 0
     except subprocess.CalledProcessError as e:
         print(
-            f"[red]Error: Command failed: {e.returncode}[/red]"
+            f"[red]Error: Command failed with exit code {e.returncode}[/red]"
             )
+        return e.returncode
     except FileNotFoundError:
         print(f"[red]Command not found:[/red] {cmd[0]}")
+        return 1
 
 
 def main() -> None:
@@ -80,10 +83,30 @@ def main() -> None:
         }
 
         if selection in commands:
-            run_command(commands[selection])
+            exit_code = run_command(commands[selection])
+            if exit_code == 0:
+                print("[green]Task completed successfully.[/green]")
+            else:
+                print("[yellow]Task encountered an error.[/yellow]")
         elif selection.lower() == "q":
             print("Exiting...")
             break
+        elif selection == "test":
+            print("\n[cyan]Running error handling tests...[/cyan]\n")
+
+            print("1. Testing success (exit 0):")
+            exit_code = run_command(["true"])
+            print(f"   Returned: {exit_code}\n")
+
+            print("2. Testing failure (exit 1):")
+            exit_code = run_command(["false"])
+            print(f"   Returned: {exit_code}\n")
+
+            print("3. Testing FileNotFoundError:")
+            exit_code = run_command(["this-does-not-exist"])
+            print(f"   Returned: {exit_code}\n")
+
+            print("[green]Tests complete![/green]\n")
         else:
             print(
                 "Invalid selection, please choose a number between 1 and 5 "
