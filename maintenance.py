@@ -79,6 +79,10 @@ def main() -> None:
     on input."""
     print(table)
     while True:
+        print(Panel.fit(
+            "[yellow]Most tasks require sudo privileges.[/yellow]",
+            border_style="yellow"
+        ))
         selection = input(
             "Linux Maintenance\n"
             "=================\n"
