@@ -1,8 +1,12 @@
 from rich import print
 from rich.table import Table
+from rich.panel import Panel
+from rich.console import Console
 import subprocess
 
 __version__ = "0.1.0"
+
+console = Console()
 
 # Script that provides reminders to perform certain regular maintenance
 # tasks on a Linux distribution.
@@ -56,12 +60,17 @@ def run_command(cmd: list[str]) -> int:
         subprocess.run(cmd, check=True)
         return 0
     except subprocess.CalledProcessError as e:
-        print(
-            f"[red]✗ Error: Command failed with exit code {e.returncode}[/red]"
+        print(Panel.fit(
+            f"[red]✗ Error: Command failed, exit code {e.returncode}[/red]",
+            border_style="red"
             )
+        )
         return e.returncode
     except FileNotFoundError:
-        print(f"[red]✗ Command not found:[/red] {cmd[0]}")
+        print(Panel.fit(
+            f"[red]✗ Command not found:[/red] {cmd[0]}",
+            border_style="red"
+            ))
         return 1
 
 
@@ -85,28 +94,37 @@ def main() -> None:
         if selection in commands:
             exit_code = run_command(commands[selection])
             if exit_code == 0:
-                print("[green]✓ Task completed successfully.[/green]")
+                print(Panel.fit(
+                    "[green]✓ Task completed successfully.[/green]",
+                    border_style="green"
+                ))
             else:
-                print("[yellow]Task encountered an error.[/yellow]")
+                print(Panel.fit("[yellow]Task encountered an error.[/yellow]",
+                                border_style="yellow"))
         elif selection.lower() == "q":
-            print("Exiting...")
+            print(Panel.fit("Exiting..."))
             break
         elif selection == "test":
-            print("\n[cyan]Running error handling tests...[/cyan]\n")
+            print(Panel.fit(
+                "\n[cyan]  Running error handling tests...  [/cyan]\n"
+                ))
 
-            print("1. Testing success (exit 0):")
+            print(Panel.fit("1. Testing success (exit 0):"))
             exit_code = run_command(["true"])
-            print(f"   Returned: {exit_code}\n")
+            print(Panel.fit(f"Returned: {exit_code}"))
 
-            print("2. Testing failure (exit 1):")
+            print(Panel.fit("2. Testing failure (exit 1):"))
             exit_code = run_command(["false"])
-            print(f"   Returned: {exit_code}\n")
+            print(Panel.fit(f"Returned: {exit_code}"))
 
-            print("3. Testing FileNotFoundError:")
+            print(Panel.fit("3. Testing FileNotFoundError:"))
             exit_code = run_command(["this-does-not-exist"])
-            print(f"   Returned: {exit_code}\n")
+            print(Panel.fit(f"Returned: {exit_code}"))
 
-            print("[green]✓ Tests complete![/green]\n")
+            print(Panel.fit(
+                "[green]✓ Tests complete![/green]",
+                border_style="green"
+            ))
         else:
             print(
                 "Invalid selection, please choose a number between 1 and 5 "
