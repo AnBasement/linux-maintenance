@@ -57,11 +57,11 @@ def run_command(cmd: list[str]) -> int:
         return 0
     except subprocess.CalledProcessError as e:
         print(
-            f"[red]Error: Command failed with exit code {e.returncode}[/red]"
+            f"[red]✗ Error: Command failed with exit code {e.returncode}[/red]"
             )
         return e.returncode
     except FileNotFoundError:
-        print(f"[red]Command not found:[/red] {cmd[0]}")
+        print(f"[red]✗ Command not found:[/red] {cmd[0]}")
         return 1
 
 
@@ -85,7 +85,7 @@ def main() -> None:
         if selection in commands:
             exit_code = run_command(commands[selection])
             if exit_code == 0:
-                print("[green]Task completed successfully.[/green]")
+                print("[green]✓ Task completed successfully.[/green]")
             else:
                 print("[yellow]Task encountered an error.[/yellow]")
         elif selection.lower() == "q":
@@ -106,7 +106,7 @@ def main() -> None:
             exit_code = run_command(["this-does-not-exist"])
             print(f"   Returned: {exit_code}\n")
 
-            print("[green]Tests complete![/green]\n")
+            print("[green]✓ Tests complete![/green]\n")
         else:
             print(
                 "Invalid selection, please choose a number between 1 and 5 "
