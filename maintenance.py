@@ -85,8 +85,8 @@ def main() -> None:
             "Select which task to perform (1-5) or 'q' to quit: ")
         commands = {
             "1": ["sudo", "apt", "update"],
-            "2": ["sudo", "apt", "upgrade", "-y"],
-            "3": ["sudo", "apt", "autoremove", "-y"],
+            "2": ["sudo", "apt", "upgrade"],
+            "3": ["sudo", "apt", "autoremove"],
             "4": ["sudo", "apt", "clean"],
             "5": ["apt", "list", "--upgradable"],
         }
