@@ -69,6 +69,51 @@ def run_command(cmd: list[str]) -> tuple[int, str, str]:
         return (127, "", f"Command not found: {cmd[0]}")
 
 
+def run_all_tasks() -> None:
+    """Runs all maintenance tasks in sequence and displays a summary.
+    Stops if any task fails."""
+    tasks = {
+        "Update": ["sudo", "apt", "update"],
+        "Upgrade": ["sudo", "apt", "upgrade"],
+        "Remove": ["sudo", "apt", "autoremove"],
+        "Clean": ["sudo", "apt", "clean"]
+    }
+
+    results_list = []
+
+    for task_counter, (task_name, command_list) in enumerate(tasks.items(), start=1):
+        exit_code, output, error = run_command(command_list)
+        results_list.append({
+            "command": task_name,
+            "exit_code": exit_code,
+            "output": output,
+            "error": error
+            })
+        if exit_code == 0:
+            continue
+        else:
+            print(Panel.fit("[red]✖ Task failed, cancelling action.[/red]",
+                            border_style="red"))
+            break
+
+    all_tasks_table = Table(title="Maintenance Summary")
+
+    all_tasks_table.add_column("Task", justify="center", no_wrap=True)
+    all_tasks_table.add_column("Exit Code", justify="center", no_wrap=True)
+    all_tasks_table.add_column("Details", justify="center")
+    all_tasks_table.add_column("Error", justify="center")
+
+    for result in results_list:
+        all_tasks_table.add_row(
+            result["command"],
+            str(result["exit_code"]),
+            result["output"] if result["output"] else "-",
+            result["error"] if result["error"] else "-"
+        )
+
+    print(all_tasks_table)
+
+
 def main() -> None:
     """Main function. Prints table and takes user input. Runs commands based
     on input."""
@@ -100,6 +145,9 @@ def main() -> None:
             else:
                 print(Panel.fit("[yellow]Task encountered an error.[/yellow]",
                                 border_style="yellow"))
+        elif selection == "all":
+            run_all_tasks()
+            continue
         elif selection.lower() == "q":
             print(Panel.fit("Exiting..."))
             break
