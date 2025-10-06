@@ -8,6 +8,29 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.2.0] - 2025-10-07
+
+### Added
+
+- You can now run the entire maintenance suite with the `all` command
+  - Command is styled with Rich progress spinner throughout
+  - Summary table shows information about performed tasks and any errors that might occur
+  - Command outputs are filtered to only show relevant information
+- UI has been updated with Rich Panel styling
+- Added a warning about requiring sudo privileges
+
+### Changed
+
+- Error handling has been enhanced with Rich styling
+- Better formatting and more options for user input
+- Command execution now captures and returns output, errors and exit codes
+- Added the `all` option to the menu
+- Improved visual feedback throughout application
+- `run_command()` has been modified to return stdout, exit codes and stderr for better error handling
+- Implemented output processing logic for different maintenance tasks
+
+---
+
 ## [0.1.0] - 2025-10-04
 
 ### Added

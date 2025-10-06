@@ -36,8 +36,8 @@ table.add_row(
 table.add_row(
     "3",
     "Remove unused packages",
-    "Cleans up packages that were automatically installed and are no longer "
-    "required",
+    ("Cleans up packages that were automatically installed and are no "
+     "longer required"),
     "sudo apt autoremove -y"
 )
 table.add_row(
@@ -86,7 +86,8 @@ def run_all_tasks() -> None:
             "[bold green]Starting maintenance tasks...[/bold green]"
             ) as status:
 
-        for task_counter, (task_name, command_list) in enumerate(tasks.items(), start=1):
+        for task_counter, (task_name, command_list) in enumerate(
+                tasks.items(), start=1):
             status.update(f"Task {task_counter} of {len(tasks)}: {task_name}")
             exit_code, output, error = run_command(command_list)
 
@@ -96,7 +97,8 @@ def run_all_tasks() -> None:
             elif task_name == "Upgrade":
                 lines = output.splitlines()
                 relevant = [
-                    line.strip() for line in lines if "upgraded" in line.lower()
+                    line.strip() for line in lines
+                    if "upgraded" in line.lower()
                     ]
                 processed_output = "\n".join(relevant) if relevant else "-"
             elif task_name == "Remove":
@@ -109,14 +111,16 @@ def run_all_tasks() -> None:
 
             results_list.append({
                 "command": task_name,
-                "exit_code": "[bold green]✓[/bold green]" if exit_code == 0 else "[bold red]✗[/bold red]",
+                "exit_code": ("[bold green]✓[/bold green]" if exit_code == 0
+                              else "[bold red]✗[/bold red]"),
                 "output": processed_output,
                 "error": error if exit_code != 0 else ""
                 })
 
             if exit_code != 0:
-                print(Panel.fit("[red]✖ Task failed, cancelling action.[/red]",
-                                border_style="red"))
+                print(Panel.fit(
+                    "[red]✖ Task failed, cancelling action.[/red]",
+                    border_style="red"))
                 break
 
     all_tasks_table = Table(title="Maintenance Summary")
@@ -173,8 +177,9 @@ def main() -> None:
                     border_style="green"
                 ))
             else:
-                print(Panel.fit("[yellow]Task encountered an error.[/yellow]",
-                                border_style="yellow"))
+                print(Panel.fit(
+                    "[yellow]Task encountered an error.[/yellow]",
+                    border_style="yellow"))
         elif selection == "all":
             run_all_tasks()
             continue
@@ -206,7 +211,7 @@ def main() -> None:
             print(
                 "Invalid selection, please choose a number between 1 and 5 "
                 "or type q to quit."
-                )
+            )
 
 
 # Entry point for the script, runs main() if executed directly
