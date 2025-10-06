@@ -89,10 +89,28 @@ def run_all_tasks() -> None:
         for task_counter, (task_name, command_list) in enumerate(tasks.items(), start=1):
             status.update(f"Task {task_counter} of {len(tasks)}: {task_name}")
             exit_code, output, error = run_command(command_list)
+
+            if task_name == "Update":
+                lines = output.splitlines()
+                processed_output = lines[-1] if lines else "-"
+            elif task_name == "Upgrade":
+                lines = output.splitlines()
+                relevant = [
+                    line.strip() for line in lines if "upgraded" in line.lower()
+                    ]
+                processed_output = "\n".join(relevant) if relevant else "-"
+            elif task_name == "Remove":
+                lines = output.splitlines()
+                processed_output = "\n".join(
+                    line for line in lines if "removed" in line.lower()
+                    ) if lines else "-"
+            elif task_name == "Clean":
+                processed_output = "-"
+
             results_list.append({
                 "command": task_name,
                 "exit_code": "[bold green]✓[/bold green]" if exit_code == 0 else "[bold red]✗[/bold red]",
-                "output": output,
+                "output": processed_output,
                 "error": error if exit_code != 0 else ""
                 })
 
@@ -103,9 +121,9 @@ def run_all_tasks() -> None:
 
     all_tasks_table = Table(title="Maintenance Summary")
 
-    all_tasks_table.add_column("Task", justify="center", no_wrap=True)
+    all_tasks_table.add_column("Task", justify="left", no_wrap=True)
     all_tasks_table.add_column("Exit Code", justify="center", no_wrap=True)
-    all_tasks_table.add_column("Details", justify="center")
+    all_tasks_table.add_column("Details", justify="left")
     all_tasks_table.add_column("Error", justify="center")
 
     for result in results_list:
@@ -137,7 +155,8 @@ def main() -> None:
         selection = input(
             "Linux Maintenance\n"
             "=================\n"
-            "Select which task to perform (1-5) or 'q' to quit: ")
+            "Select which task to perform (1-5), 'all' "
+            "to run full suite or 'q' to quit: ")
         commands = {
             "1": ["sudo", "apt", "update"],
             "2": ["sudo", "apt", "upgrade"],
