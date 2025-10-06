@@ -91,7 +91,7 @@ def run_all_tasks() -> None:
             exit_code, output, error = run_command(command_list)
             results_list.append({
                 "command": task_name,
-                "exit_code": exit_code,
+                "exit_code": "[bold green]✓[/bold green]" if exit_code == 0 else "[bold red]✗[/bold red]",
                 "output": output,
                 "error": error if exit_code != 0 else ""
                 })
@@ -123,11 +123,17 @@ def main() -> None:
     """Main function. Prints table and takes user input. Runs commands based
     on input."""
     print(table)
+    first_run = True
     while True:
-        print(Panel.fit(
-            "[yellow]Most tasks require sudo privileges.[/yellow]",
-            border_style="yellow"
-        ))
+        if first_run:
+            print(Panel.fit(
+                "[yellow]Most tasks require sudo privileges.[/yellow]",
+                border_style="yellow"
+            ))
+            first_run = False
+        else:
+            continue
+
         selection = input(
             "Linux Maintenance\n"
             "=================\n"
