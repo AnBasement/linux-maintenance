@@ -93,8 +93,9 @@ def run_all_tasks() -> None:
                 "command": task_name,
                 "exit_code": exit_code,
                 "output": output,
-                "error": error
+                "error": error if exit_code != 0 else ""
                 })
+
             if exit_code != 0:
                 print(Panel.fit("[red]✖ Task failed, cancelling action.[/red]",
                                 border_style="red"))
