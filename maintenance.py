@@ -74,13 +74,14 @@ def run_all_tasks() -> None:
     Stops if any task fails."""
     tasks = {
         "Update": ["sudo", "apt", "update"],
-        "Upgrade": ["sudo", "apt", "upgrade"],
-        "Remove": ["sudo", "apt", "autoremove"],
+        "Upgrade": ["sudo", "apt", "upgrade", "-y"],
+        "Remove": ["sudo", "apt", "autoremove", "-y"],
         "Clean": ["sudo", "apt", "clean"]
     }
 
     results_list = []
 
+    subprocess.run(["sudo", "-v"])
     with console.status(
             "[bold green]Starting maintenance tasks...[/bold green]"
             ) as status:
