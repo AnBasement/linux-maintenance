@@ -81,20 +81,23 @@ def run_all_tasks() -> None:
 
     results_list = []
 
-    for task_counter, (task_name, command_list) in enumerate(tasks.items(), start=1):
-        exit_code, output, error = run_command(command_list)
-        results_list.append({
-            "command": task_name,
-            "exit_code": exit_code,
-            "output": output,
-            "error": error
-            })
-        if exit_code == 0:
-            continue
-        else:
-            print(Panel.fit("[red]✖ Task failed, cancelling action.[/red]",
-                            border_style="red"))
-            break
+    with console.status(
+            "[bold green]Starting maintenance tasks...[/bold green]"
+            ) as status:
+
+        for task_counter, (task_name, command_list) in enumerate(tasks.items(), start=1):
+            status.update(f"Task {task_counter} of {len(tasks)}: {task_name}")
+            exit_code, output, error = run_command(command_list)
+            results_list.append({
+                "command": task_name,
+                "exit_code": exit_code,
+                "output": output,
+                "error": error
+                })
+            if exit_code != 0:
+                print(Panel.fit("[red]✖ Task failed, cancelling action.[/red]",
+                                border_style="red"))
+                break
 
     all_tasks_table = Table(title="Maintenance Summary")
 
