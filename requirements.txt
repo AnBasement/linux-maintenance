@@ -4,14 +4,15 @@ bracex==2.6
 bump-my-version==1.2.4
 certifi==2025.8.3
 click==8.2.1
-dbus-python==1.4.0
 h11==0.16.0
 httpcore==1.0.9
 httpx==0.28.1
 idna==3.10
+jeepney==0.9.0
+loguru==0.6.0
 markdown-it-py==4.0.0
 mdurl==0.1.2
-notify2==0.3.1
+notify_py==0.3.43
 prompt_toolkit==3.0.52
 pydantic==2.11.10
 pydantic-settings==2.11.0
