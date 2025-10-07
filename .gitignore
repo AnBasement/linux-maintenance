@@ -70,3 +70,6 @@ ehthumbs.db
 
 # Files with identifiable personal information
 run_maintenance.sh
+
+# Logs and databases
+/logs/
