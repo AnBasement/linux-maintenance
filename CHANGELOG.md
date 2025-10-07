@@ -6,6 +6,20 @@ All notable changes to the project will be documented here.
 The format is based on [Keep a Changelog v1.1.0](https://keepachangelog.com/en/1.1.0/),
 and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2025-10-07
+
+### Fixed
+
+- Fixed loop in main menu that led to not accepting user input more than once
+
+---
+
+## [0.2.1] - 2025-10-07
+
+### Fixed
+
+- Fixed incorrect error handling of run_command() that returned error even on successfull completions
+
 ---
 
 ## [0.2.0] - 2025-10-07

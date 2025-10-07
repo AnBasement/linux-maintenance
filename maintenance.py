@@ -153,8 +153,6 @@ def main() -> None:
                 border_style="yellow"
             ))
             first_run = False
-        else:
-            continue
 
         selection = input(
             "Linux Maintenance\n"
