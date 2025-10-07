@@ -262,4 +262,9 @@ def main() -> None:
 
 # Entry point for the script, runs main() if executed directly
 if __name__ == "__main__":
-    main()
+    import sys
+    # Skips menu if 'auto' is passed as an argument
+    if len(sys.argv) > 1 and sys.argv[1] == "auto":
+        run_all_tasks()
+    else:
+        main()
