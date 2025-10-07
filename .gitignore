@@ -67,3 +67,6 @@ Thumbs.db
 .Spotlight-V100
 .Trashes
 ehthumbs.db
+
+# Files with identifiable personal information
+run_maintenance.sh
