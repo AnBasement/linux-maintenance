@@ -1,9 +1,12 @@
 annotated-types==0.7.0
 anyio==4.11.0
+bidict==0.23.1
 bracex==2.6
 bump-my-version==1.2.4
 certifi==2025.8.3
 click==8.2.1
+dbus-fast==2.44.5
+desktop-notifier==6.2.0
 h11==0.16.0
 httpcore==1.0.9
 httpx==0.28.1
@@ -12,7 +15,7 @@ jeepney==0.9.0
 loguru==0.6.0
 markdown-it-py==4.0.0
 mdurl==0.1.2
-notify_py==0.3.43
+packaging==25.0
 prompt_toolkit==3.0.52
 pydantic==2.11.10
 pydantic-settings==2.11.0
