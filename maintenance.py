@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from rich import print
 from rich.table import Table
 from rich.panel import Panel
