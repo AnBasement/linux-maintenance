@@ -4,7 +4,7 @@ from rich.panel import Panel
 from rich.console import Console
 import subprocess
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 console = Console()
 
