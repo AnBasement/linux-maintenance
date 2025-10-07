@@ -3,10 +3,14 @@ from rich.table import Table
 from rich.panel import Panel
 from rich.console import Console
 import subprocess
+import asyncio
+from desktop_notifier import DesktopNotifier
 
 __version__ = "0.2.2"
 
 console = Console()
+
+notifier = DesktopNotifier(app_name="Linux Maintenance")
 
 # Script that provides reminders to perform certain regular maintenance
 # tasks on a Linux distribution.
@@ -54,6 +58,11 @@ table.add_row(
 )
 
 
+def send_notification(title, message):
+    """Send a desktop notification."""
+    asyncio.run(notifier.send(title=title, message=message))
+
+
 def run_command(cmd: list[str]) -> tuple[int, str, str]:
     """Execute a command and handle errors if any. Returns exit code."""
     try:
@@ -81,6 +90,7 @@ def run_all_tasks() -> None:
 
     results_list = []
 
+    send_notification("Maintenance Started", "Running all maintenance tasks.")
     subprocess.run(["sudo", "-v"])
     with console.status(
             "[bold green]Starting maintenance tasks...[/bold green]"
@@ -138,6 +148,10 @@ def run_all_tasks() -> None:
             result["error"] if result["error"] else "-"
         )
 
+    send_notification(
+        "Maintenance Complete",
+        f"{len(results_list)} tasks have been processed."
+        )
     print(all_tasks_table)
 
 
@@ -170,11 +184,21 @@ def main() -> None:
         if selection in commands:
             exit_code, output, error = run_command(commands[selection])
             if exit_code == 0:
+                send_notification(
+                    "Task Completed",
+                    f"Command '{' '.join(commands[selection])}' completed "
+                    "successfully."
+                )
                 print(Panel.fit(
                     "[green]✓ Task completed successfully.[/green]",
                     border_style="green"
                 ))
             else:
+                send_notification(
+                    "Task Error",
+                    f"Command '{' '.join(commands[selection])}' encountered "
+                    "an error."
+                )
                 print(Panel.fit(
                     "[yellow]Task encountered an error.[/yellow]",
                     border_style="yellow"))
