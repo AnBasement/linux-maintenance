@@ -155,7 +155,8 @@ def run_all_tasks() -> None:
 
     send_notification(
         "Maintenance Complete",
-        f"{len(results_list)} tasks have been processed."
+        f"{len(results_list)} tasks have been processed.",
+        Urgency.Critical
         )
     print(all_tasks_table)
 
