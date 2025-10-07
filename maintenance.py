@@ -4,7 +4,7 @@ from rich.panel import Panel
 from rich.console import Console
 import subprocess
 import asyncio
-from desktop_notifier import DesktopNotifier
+from desktop_notifier import DesktopNotifier, Urgency
 
 __version__ = "0.2.2"
 
@@ -58,9 +58,9 @@ table.add_row(
 )
 
 
-def send_notification(title, message):
+def send_notification(title, message, urgency=Urgency.Normal):
     """Send a desktop notification."""
-    asyncio.run(notifier.send(title=title, message=message))
+    asyncio.run(notifier.send(title=title, message=message, urgency=urgency))
 
 
 def run_command(cmd: list[str]) -> tuple[int, str, str]:
@@ -131,6 +131,7 @@ def run_all_tasks() -> None:
                 send_notification(
                     "Maintenance Error",
                     f"Task '{task_name}' encountered an error."
+                    "Urgency.Critical"
                     )
                 print(Panel.fit(
                     "[red]✖ Task failed, cancelling action.[/red]",
@@ -201,7 +202,8 @@ def main() -> None:
                 send_notification(
                     "Task Error",
                     f"Command '{' '.join(commands[selection])}' encountered "
-                    "an error."
+                    "an error.",
+                    Urgency.Critical
                 )
                 print(Panel.fit(
                     "[yellow]Task encountered an error.[/yellow]",
@@ -219,15 +221,30 @@ def main() -> None:
 
             print(Panel.fit("1. Testing success (exit 0):"))
             exit_code, output, error = run_command(["true"])
+            send_notification(
+                "Test Completed",
+                "Test command 'true' completed successfully.",
+                Urgency.Normal
+                )
             print(Panel.fit(f"Returned: {exit_code}"))
 
             print(Panel.fit("2. Testing failure (exit 1):"))
             exit_code, output, error = run_command(["false"])
+            send_notification(
+                "Test Completed",
+                "Test command 'false' failed.",
+                Urgency.Critical
+                )
             print(Panel.fit(f"Returned: {exit_code}"))
 
             print(Panel.fit("3. Testing FileNotFoundError:"))
             exit_code, output, error = run_command(["this-does-not-exist"])
             print(Panel.fit(f"Returned: {exit_code}"))
+            send_notification(
+                "Test Completed",
+                "Test command 'this-does-not-exist' failed.",
+                Urgency.Critical
+                )
 
             print(Panel.fit(
                 "[green]✓ Tests complete![/green]",
