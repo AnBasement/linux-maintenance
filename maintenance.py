@@ -128,6 +128,10 @@ def run_all_tasks() -> None:
                 })
 
             if exit_code != 0:
+                send_notification(
+                    "Maintenance Error",
+                    f"Task '{task_name}' encountered an error."
+                    )
                 print(Panel.fit(
                     "[red]✖ Task failed, cancelling action.[/red]",
                     border_style="red"))
