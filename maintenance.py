@@ -190,15 +190,15 @@ def main() -> None:
                 ))
 
             print(Panel.fit("1. Testing success (exit 0):"))
-            exit_code = run_command(["true"])
+            exit_code, output, error = run_command(["true"])
             print(Panel.fit(f"Returned: {exit_code}"))
 
             print(Panel.fit("2. Testing failure (exit 1):"))
-            exit_code = run_command(["false"])
+            exit_code, output, error = run_command(["false"])
             print(Panel.fit(f"Returned: {exit_code}"))
 
             print(Panel.fit("3. Testing FileNotFoundError:"))
-            exit_code = run_command(["this-does-not-exist"])
+            exit_code, output, error = run_command(["this-does-not-exist"])
             print(Panel.fit(f"Returned: {exit_code}"))
 
             print(Panel.fit(
