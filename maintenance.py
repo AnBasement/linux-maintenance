@@ -7,6 +7,21 @@ from rich.console import Console
 import subprocess
 import asyncio
 from desktop_notifier import DesktopNotifier, Urgency
+import logging
+from pathlib import Path
+
+# Setup logging
+log_path = Path(__file__).parent / "logs" / "maintenance.log"
+log_path.parent.mkdir(exist_ok=True)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler(log_path)
+    ]
+)
+logger = logging.getLogger("maintenance")
 
 __version__ = "0.3.0"
 
