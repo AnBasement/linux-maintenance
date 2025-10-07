@@ -170,7 +170,7 @@ def main() -> None:
         }
 
         if selection in commands:
-            exit_code = run_command(commands[selection])
+            exit_code, output, error = run_command(commands[selection])
             if exit_code == 0:
                 print(Panel.fit(
                     "[green]✓ Task completed successfully.[/green]",
