@@ -14,14 +14,16 @@ from pathlib import Path
 log_path = Path(__file__).parent / "logs" / "maintenance.log"
 log_path.parent.mkdir(exist_ok=True)
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[
-        logging.FileHandler(log_path)
-    ]
-)
+handler = logging.FileHandler(log_path)
+handler.setLevel(logging.INFO)
+handler.setFormatter(logging.Formatter(
+    "%(asctime)s [%(levelname)s] %(message)s"
+))
+
 logger = logging.getLogger("maintenance")
+logger.setLevel(logging.INFO)
+logger.addHandler(handler)
+logger.propagate = False
 
 __version__ = "0.4.0"
 
@@ -87,16 +89,16 @@ def run_command(cmd: list[str]) -> tuple[int, str, str]:
         result = subprocess.run(
             cmd, capture_output=True, text=True, check=True
             )
-        logger.info(f"Command succeeded: {' '.join(cmd)}")
+
         output = result.stdout.strip()
         error = result.stderr.strip()
 
-        logger.info(f"Command succeeded: {' '.join(cmd)}")
         if output:
             logger.info(f"Output: {output}")
         if error:
             logger.warning(f"Error Output: {error}")
 
+        logger.info(f"Command succeeded: {' '.join(cmd)}")
         return (0, output, error)
 
     except subprocess.CalledProcessError as e:

@@ -6,6 +6,12 @@ All notable changes to the project will be documented here.
 The format is based on [Keep a Changelog v1.1.0](https://keepachangelog.com/en/1.1.0/),
 and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2025-10-08
+
+### Fixed
+
+- Fixed duplicated log entries; cleaned up command success/error logging.
+
 ## [0.4.0] - 2025-10-08
 
 ### Added
