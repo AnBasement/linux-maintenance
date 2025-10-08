@@ -6,6 +6,23 @@ All notable changes to the project will be documented here.
 The format is based on [Keep a Changelog v1.1.0](https://keepachangelog.com/en/1.1.0/),
 and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2025-10-08
+
+### Added
+
+- Logging system for maintenance operations
+  - Logs are saved to `logs/maintenance.log`
+  - Command execution, outputs, and errors are logged with timestamps
+  - Separate log levels for info, warnings, and errors
+- Script prepared for automated execution
+  - Script can be run with `auto` argument to skip interactive menu
+  - Designed for anacron/cron scheduling with minimal user interaction
+  - Made script executable with proper shebang for direct execution
+- Shell script template for anacron/cron integration
+  - Basic template added to README for virtual environment activation
+
+---
+
 ## [0.3.0] - 2025-10-07
 
 ### Added
