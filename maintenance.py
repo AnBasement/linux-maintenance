@@ -82,17 +82,31 @@ def send_notification(title, message, urgency=Urgency.Normal):
 
 def run_command(cmd: list[str]) -> tuple[int, str, str]:
     """Execute a command and handle errors if any. Returns exit code."""
+    logger.info(f"Executing: {' '.join(cmd)}")
     try:
         result = subprocess.run(
             cmd, capture_output=True, text=True, check=True
             )
+        logger.info(f"Command succeeded: {' '.join(cmd)}")
         output = result.stdout.strip()
         error = result.stderr.strip()
+
+        logger.info(f"Command succeeded: {' '.join(cmd)}")
+        if output:
+            logger.info(f"Output: {output}")
+        if error:
+            logger.warning(f"Error Output: {error}")
+
         return (0, output, error)
+
     except subprocess.CalledProcessError as e:
+        logger.error(f"Command failed: {' '.join(cmd)}\n{e.stderr.strip()}")
         return (e.returncode, e.stdout.strip(), e.stderr.strip())
+
     except FileNotFoundError:
-        return (127, "", f"Command not found: {cmd[0]}")
+        error = f"Command not found: {cmd[0]}"
+        logger.error(error)
+        return (127, "", error)
 
 
 def run_all_tasks() -> None:
@@ -108,7 +122,8 @@ def run_all_tasks() -> None:
     results_list = []
 
     send_notification("Maintenance Started", "Running all maintenance tasks.")
-    subprocess.run(["sudo", "-v"])
+    logger.info("Maintenance started.")
+
     with console.status(
             "[bold green]Starting maintenance tasks...[/bold green]"
             ) as status:
@@ -116,6 +131,10 @@ def run_all_tasks() -> None:
         for task_counter, (task_name, command_list) in enumerate(
                 tasks.items(), start=1):
             status.update(f"Task {task_counter} of {len(tasks)}: {task_name}")
+            logger.info(
+                f"Running task {task_counter}/{len(tasks)}: {task_name}"
+                )
+
             exit_code, output, error = run_command(command_list)
 
             if task_name == "Update":
@@ -145,6 +164,7 @@ def run_all_tasks() -> None:
                 })
 
             if exit_code != 0:
+                logger.error(f"Task '{task_name}' failed: {error}")
                 send_notification(
                     "Maintenance Error",
                     f"Task '{task_name}' encountered an error."
