@@ -73,3 +73,6 @@ run_maintenance.sh
 
 # Logs and databases
 /logs/
+
+# GitHub workflows
+.github/
