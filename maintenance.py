@@ -14,15 +14,18 @@ from pathlib import Path
 log_path = Path(__file__).parent / "logs" / "maintenance.log"
 log_path.parent.mkdir(exist_ok=True)
 
-handler = logging.FileHandler(log_path)
-handler.setLevel(logging.INFO)
-handler.setFormatter(logging.Formatter(
-    "%(asctime)s [%(levelname)s] %(message)s"
-))
-
 logger = logging.getLogger("maintenance")
 logger.setLevel(logging.INFO)
-logger.addHandler(handler)
+
+# Only add handler if one doesn't already exist
+if not logger.handlers:
+    handler = logging.FileHandler(log_path)
+    handler.setLevel(logging.INFO)
+    handler.setFormatter(logging.Formatter(
+        "%(asctime)s [%(levelname)s] %(message)s"
+    ))
+    logger.addHandler(handler)
+
 logger.propagate = False
 
 __version__ = "0.4.1"
