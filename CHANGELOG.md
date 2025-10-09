@@ -6,6 +6,15 @@ All notable changes to the project will be documented here.
 The format is based on [Keep a Changelog v1.1.0](https://keepachangelog.com/en/1.1.0/),
 and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2] - 2025-10-09
+
+### Fixed
+
+- Prevent duplicated log entries by ensuring a single FileHandler is attached to the logger.
+- Creates fresh desktop notifier every time to avoid `RuntimeError` when running all tasks.
+
+---
+
 ## [0.4.1] - 2025-10-08
 
 ### Fixed
