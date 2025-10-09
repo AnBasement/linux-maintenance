@@ -79,7 +79,13 @@ table.add_row(
 
 def send_notification(title, message, urgency=Urgency.Normal):
     """Send a desktop notification."""
-    asyncio.run(notifier.send(title=title, message=message, urgency=urgency))
+    try:
+        notifier = DesktopNotifier(app_name="Linux Maintenance")
+        asyncio.run(
+            notifier.send(title=title, message=message, urgency=urgency)
+            )
+    except RuntimeError as e:
+        logger.warning(f"Notification failed: {e}")
 
 
 def run_command(cmd: list[str]) -> tuple[int, str, str]:
