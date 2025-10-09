@@ -28,7 +28,7 @@ if not logger.handlers:
 
 logger.propagate = False
 
-__version__ = "0.4.1"
+__version__ = "0.4.2"
 
 console = Console()
 
