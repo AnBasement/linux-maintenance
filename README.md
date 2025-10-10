@@ -188,7 +188,7 @@ See the [Python logging documentation](https://docs.python.org/3/library/logging
 
 ## Requirements
 
-- Python 3.6 or newer
+- Python 3.9 or newer
 - Ubuntu/Debian-based Linux distribution (uses `apt` package manager)
 - `sudo` access for package management operations
 
