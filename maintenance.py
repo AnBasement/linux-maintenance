@@ -13,13 +13,20 @@ from pathlib import Path
 import argparse
 
 # Setup argument parser
+version_file = Path(__file__).parent / "VERSION"
+if version_file.exists():
+    with open(version_file) as vf:
+        version_str = vf.read().strip()
+else:
+    version_str = "unknown"
+
 parser = argparse.ArgumentParser(
     description="Linux Maintenance Script"
-    )
+)
 parser.add_argument(
     "--version", action="version",
-    version="Linux Maintenance version 0.4.4"
-    )
+    version=f"Linux Maintenance Script version {version_str}"
+)
 parser.add_argument(
     "--auto", action="store_true",
     help="Run all maintenance tasks automatically without prompts"
