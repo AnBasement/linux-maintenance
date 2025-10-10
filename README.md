@@ -102,7 +102,7 @@ If you know your system will always be powered on at certain times, a cron job w
    Add this line (replace `username` with your actual username):
 
    ```text
-   yourusername ALL=(ALL) NOPASSWD: /usr/bin/apt update -y, /usr/bin/apt upgrade -y, /usr/bin/apt autoremove -y, /usr/bin/apt autoclean -y
+   username ALL=(ALL) NOPASSWD: /usr/bin/apt upgrade -y, /usr/bin/apt autoremove -y, /usr/bin/apt autoclean -y
    ```
 
 4. **Add anacron job:**

@@ -16,10 +16,12 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Changing from `clean` to `autoclean` with the `-y` flag.
 - Function run_all_tasks() now uses the output helper functions on all relevant tasks.
+- Updated README to require Python 3.9 or newer.
 
 ### Fixed
 
 - Notification urgency bug fixed in the function run_all_tasks().
+- Tweak README to match sudoers entries with actual commands being run.
 
 ## [0.4.4] - 2025-10-10
 
