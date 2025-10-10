@@ -15,6 +15,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 - Changing from `clean` to `autoclean` with the `-y` flag.
+- Function run_all_tasks() now uses the output helper functions on all relevant tasks.
 
 ### Fixed
 

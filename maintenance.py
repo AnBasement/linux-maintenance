@@ -204,8 +204,7 @@ def run_all_tasks() -> None:
             exit_code, output, error = run_command(command_list)
 
             if task_name == "Update":
-                lines = output.splitlines()
-                processed_output = lines[-1] if lines else "-"
+                processed_output = summarize_update_output(output)
             elif task_name == "Upgrade":
                 processed_output = summarize_upgrade_output(output)
             elif task_name == "Remove":
