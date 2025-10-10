@@ -281,16 +281,19 @@ def main() -> None:
             if exit_code == 0:
                 send_notification(
                     "Task Completed",
-                    f"Command '{' '.join(commands[selection])}' completed successfully."
+                    f"Command '{' '.join(commands[selection])}' "
+                    f"completed successfully."
                 )
                 print(Panel.fit(
-                    f"[green]✓ Task completed successfully.[/green]\n[white]{summary}[/white]",
+                    f"[green]✓ Task completed successfully.[/green]\n"
+                    f"[white]{summary}[/white]",
                     border_style="green"
                 ))
             else:
                 send_notification(
                     "Task Error",
-                    f"Command '{' '.join(commands[selection])}' encountered an error.",
+                    f"Command '{' '.join(commands[selection])}' "
+                    f"encountered an error.",
                     Urgency.Critical
                 )
                 print(Panel.fit(
