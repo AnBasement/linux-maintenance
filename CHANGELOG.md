@@ -6,6 +6,14 @@ All notable changes to the project will be documented here.
 The format is based on [Keep a Changelog v1.1.0](https://keepachangelog.com/en/1.1.0/),
 and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.4] - 2025-10-10
+
+### Added
+
+- Implemented log rotation with 4 backups. Hardcoded to wednesdays, with instructions on how to change to fit personal preference.
+
+---
+
 ## [0.4.3] - 2025-10-10
 
 ### Added
