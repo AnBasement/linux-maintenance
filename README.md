@@ -150,12 +150,14 @@ The script runs these maintenance tasks:
 3. **Remove unused packages** - `sudo apt autoremove -y`
 4. **Clean package cache** - `sudo apt autoclean -y`
 
-## Sudoers stuff (be careful!)
+## Sudo acess
 
 The script needs sudo access for package management. For automated runs, you need to set up passwordless sudo for specific commands. **I want to stress this is somewhat risky** - you're giving your user passwordless sudo access for these commands. Only do this if you understand what that means and you're okay with the security implications:
 
+Instead of editing `/etc/sudoers` directly, you can add your rule to a new file in `/etc/sudoers.d/`
+
 ```bash
-sudo visudo
+sudo nano /etc/sudoers.d/linux-maintenance
 ```
 
 Add this line (replace `username` with your actual username):
@@ -163,6 +165,14 @@ Add this line (replace `username` with your actual username):
 ```text
 username ALL=(ALL) NOPASSWD: /usr/bin/apt update -y, /usr/bin/apt upgrade -y, /usr/bin/apt autoremove -y, /usr/bin/apt autoclean -y
 ```
+
+Now set permissions:
+
+```bash
+sudo chmod 0440 /etc/sudoers.d/linux-maintenance
+```
+
+This keeps your configuration clean and separate from the main sudoers file.
 
 ## Logging
 

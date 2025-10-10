@@ -91,7 +91,7 @@ table.add_row(
     "4",
     "Clean apt cache",
     "Frees up disk space by deleting cached package files.",
-    "sudo apt clean"
+    "sudo apt autoclean -y"
 )
 table.add_row(
     "5",
@@ -182,7 +182,7 @@ def run_all_tasks() -> None:
         "Update": ["sudo", "apt", "update"],
         "Upgrade": ["sudo", "apt", "upgrade", "-y"],
         "Remove": ["sudo", "apt", "autoremove", "-y"],
-        "Clean": ["sudo", "apt", "clean"]
+        "Clean": ["sudo", "apt", "autoclean", "-y"]
     }
 
     results_list = []
@@ -225,8 +225,8 @@ def run_all_tasks() -> None:
                 logger.error(f"Task '{task_name}' failed: {error}")
                 send_notification(
                     "Maintenance Error",
-                    f"Task '{task_name}' encountered an error."
-                    "Urgency.Critical"
+                    f"Task '{task_name}' encountered an error.",
+                    Urgency.Critical
                     )
                 print(Panel.fit(
                     "[red]✖ Task failed, cancelling action.[/red]",
@@ -278,7 +278,7 @@ def main() -> None:
             "1": ["sudo", "apt", "update"],
             "2": ["sudo", "apt", "upgrade", "-y"],
             "3": ["sudo", "apt", "autoremove", "-y"],
-            "4": ["sudo", "apt", "clean"],
+            "4": ["sudo", "apt", "autoclean", "-y"],
             "5": ["apt", "list", "--upgradable"],
         }
 
