@@ -8,6 +8,7 @@ import subprocess
 import asyncio
 from desktop_notifier import DesktopNotifier, Urgency
 import logging
+from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 
 # Setup logging
@@ -18,8 +19,13 @@ logger = logging.getLogger("maintenance")
 logger.setLevel(logging.INFO)
 
 # Only add handler if one doesn't already exist
-if not logger.handlers:
-    handler = logging.FileHandler(log_path)
+if not any(isinstance(h, TimedRotatingFileHandler) for h in logger.handlers):
+    handler = TimedRotatingFileHandler(
+        log_path,
+        when="W2",           # Rotate every Wednesday
+        backupCount=4,       # Keep 4 backups
+        encoding="utf-8"
+    )
     handler.setLevel(logging.INFO)
     handler.setFormatter(logging.Formatter(
         "%(asctime)s [%(levelname)s] %(message)s"

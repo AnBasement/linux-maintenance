@@ -172,6 +172,10 @@ Logs get saved to the `logs/` directory:
 - Includes what commands ran, their output, and any errors
 - The log folder gets created automatically if it doesn't exist
 
+**Note:** The log rotation in `maintenance.py` is hardcoded to every Wednesday at midnight by default.  
+If you set up your anacron  for a different day, youcan change the log rotation weekday (`when="W2"`) in the script to match your schedule.  
+See the [Python logging documentation](https://docs.python.org/3/library/logging.handlers.html#timedrotatingfilehandler) for information.
+
 ## Requirements
 
 - Python 3.6 or newer
