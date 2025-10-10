@@ -34,7 +34,7 @@ if not any(isinstance(h, TimedRotatingFileHandler) for h in logger.handlers):
 
 logger.propagate = False
 
-__version__ = "0.4.3"
+__version__ = "0.4.4"
 
 console = Console()
 
