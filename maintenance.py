@@ -80,6 +80,36 @@ table.add_row(
 )
 
 
+def summarize_update_output(output: str) -> str:
+    lines = output.splitlines()
+    for line in lines:
+        if "packages can be upgraded" in line.lower():
+            return line.strip()
+        if "all packages are up to date" in line.lower():
+            return line.strip()
+
+    return lines[-1].strip() if lines else "-"
+
+
+def summarize_upgrade_output(output: str) -> str:
+    """Extracts summary lines from apt upgrade output."""
+    lines = output.splitlines()
+
+    for line in lines:
+        if "upgraded," in line.lower() and "newly installed" in line.lower():
+            return line.strip()
+        if "no packages will be upgraded" in line.lower():
+            return line.strip()
+
+    return lines[-1].strip() if lines else "-"
+
+
+def summarize_remove_output(output: str) -> str:
+    lines = output.splitlines()
+    relevant = [line for line in lines if "removed" in line.lower()]
+    return "\n".join(relevant) if relevant else "-"
+
+
 def send_notification(title, message, urgency=Urgency.Normal):
     """Send a desktop notification."""
     try:
@@ -152,17 +182,9 @@ def run_all_tasks() -> None:
                 lines = output.splitlines()
                 processed_output = lines[-1] if lines else "-"
             elif task_name == "Upgrade":
-                lines = output.splitlines()
-                relevant = [
-                    line.strip() for line in lines
-                    if "upgraded" in line.lower()
-                    ]
-                processed_output = "\n".join(relevant) if relevant else "-"
+                processed_output = summarize_upgrade_output(output)
             elif task_name == "Remove":
-                lines = output.splitlines()
-                processed_output = "\n".join(
-                    line for line in lines if "removed" in line.lower()
-                    ) if lines else "-"
+                processed_output = summarize_remove_output(output)
             elif task_name == "Clean":
                 processed_output = "-"
 
@@ -229,34 +251,42 @@ def main() -> None:
             "to run full suite or 'q' to quit: ")
         commands = {
             "1": ["sudo", "apt", "update"],
-            "2": ["sudo", "apt", "upgrade"],
-            "3": ["sudo", "apt", "autoremove"],
+            "2": ["sudo", "apt", "upgrade", "-y"],
+            "3": ["sudo", "apt", "autoremove", "-y"],
             "4": ["sudo", "apt", "clean"],
             "5": ["apt", "list", "--upgradable"],
         }
 
         if selection in commands:
             exit_code, output, error = run_command(commands[selection])
+            # Use summary helpers for upgrade/remove
+            if selection == "1":
+                summary = summarize_update_output(output)
+            elif selection == "2":
+                summary = summarize_upgrade_output(output)
+            elif selection == "3":
+                summary = summarize_remove_output(output)
+            else:
+                summary = output
             if exit_code == 0:
                 send_notification(
                     "Task Completed",
-                    f"Command '{' '.join(commands[selection])}' completed "
-                    "successfully."
+                    f"Command '{' '.join(commands[selection])}' completed successfully."
                 )
                 print(Panel.fit(
-                    "[green]✓ Task completed successfully.[/green]",
+                    f"[green]✓ Task completed successfully.[/green]\n[white]{summary}[/white]",
                     border_style="green"
                 ))
             else:
                 send_notification(
                     "Task Error",
-                    f"Command '{' '.join(commands[selection])}' encountered "
-                    "an error.",
+                    f"Command '{' '.join(commands[selection])}' encountered an error.",
                     Urgency.Critical
                 )
                 print(Panel.fit(
                     "[yellow]Task encountered an error.[/yellow]",
                     border_style="yellow"))
+
         elif selection == "all":
             run_all_tasks()
             continue
