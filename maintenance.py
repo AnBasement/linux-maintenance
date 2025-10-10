@@ -135,7 +135,11 @@ def run_command(cmd: list[str]) -> tuple[int, str, str]:
         if output:
             logger.info(f"Output: {output}")
         if error:
-            logger.warning(f"Error Output: {error}")
+            apt_warning = "apt does not have a stable CLI interface"
+            if apt_warning in error:
+                logger.info(f"Error Output: {error}")
+            else:
+                logger.warning(f"Error Output: {error}")
 
         logger.info(f"Command succeeded: {' '.join(cmd)}")
         return (0, output, error)
