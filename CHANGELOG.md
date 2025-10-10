@@ -6,6 +6,23 @@ All notable changes to the project will be documented here.
 The format is based on [Keep a Changelog v1.1.0](https://keepachangelog.com/en/1.1.0/),
 and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.3] - 2025-10-10
+
+### Added
+
+- Helper functions for parsing and summarizing apt command output
+
+### Changed
+
+- Improved output summaries for Update, Upgrade, and Remove tasks
+- Downgraded apt CLI stability warnings from WARNING to INFO level to reduce log noise
+
+### Fixed
+
+- Resolved subprocess crashes when running individual tasks that require confirmation by adding `-y` flags to relevant commands
+
+---
+
 ## [0.4.2] - 2025-10-09
 
 ### Fixed
