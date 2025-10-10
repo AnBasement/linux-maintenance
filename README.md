@@ -68,30 +68,35 @@ If you know your system will always be powered on at certain times, a cron job w
 
 1. **Create a wrapper script** (e.g., `run_maintenance.sh`):
 
+Copy this entire section and add it to your run_maintenance.sh. Then, edit to suit your own setup.  
+Change `/home/username/path/to/linux-maintenance` to match where you put the project.
+
    ```bash
    #!/bin/bash
-   
-   # Set env variables
-   export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-   export HOME="/home/username"
-   
-   # Activate virtual environment
-   source /home/username/path/to/linux-maintenance/venv/bin/activate
-   
-   # Change to script directory
-   cd /home/username/path/to/linux-maintenance
-   
-   # Run maintenance script in auto mode
+   # Go to your project folder
+   cd /home/username/path/to/linux-maintenance || exit
+
+   # Activate your Python virtual environment
+   source venv/bin/activate
+
+   # Set up desktop notifications (needed for some systems)
+   export DISPLAY=:0
+   export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u)/bus
+
+   # Make sure the logs folder exists
+   mkdir -p logs
+
+   # Run the maintenance script in auto mode and save output to the log
    ./maintenance.py --auto >> logs/maintenance.log 2>&1
    ```
 
-2. **Make the wrapper executable:**
+1. **Make the wrapper executable:**
 
    ```bash
    chmod +x run_maintenance.sh
    ```
 
-3. **Configure sudoers for passwordless execution**
+2. **Configure sudoers for passwordless execution**
 
    This step is required for automated runs. **WARNING**: This gives your user passwordless sudo access for these specific commands. Only do this if you understand the security implications and are okay with the risk.
 
@@ -105,7 +110,7 @@ If you know your system will always be powered on at certain times, a cron job w
    username ALL=(ALL) NOPASSWD: /usr/bin/apt upgrade -y, /usr/bin/apt autoremove -y, /usr/bin/apt autoclean -y
    ```
 
-4. **Add anacron job:**
+3. **Add anacron job:**
 
    ```bash
    sudo nano /etc/anacrontab
@@ -119,7 +124,7 @@ If you know your system will always be powered on at certain times, a cron job w
 
    Format: `period_days  delay_minutes  job_name  command`
 
-5. **Test the anacron job:**
+4. **Test the anacron job:**
 
    ```bash
    sudo anacron -f -n
