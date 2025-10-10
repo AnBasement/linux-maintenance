@@ -9,7 +9,7 @@ I want to stress that I wont take responsibility for anything going wrong if you
 ## What it does
 
 - **Interactive menu**: Pretty terminal interface (using Rich library) where you can pick tasks manually
-- **Auto mode**: Run everything at once with `python maintenance.py auto` - good for scheduling
+- **Auto mode**: Run everything at once with `python maintenance.py --auto` - good for scheduling
 - **Desktop notifications**: Pops up notifications when stuff finishes (or breaks)
 - **Basic logging**: Saves what happened to `logs/maintenance.log` so you can see what went wrong
 - **Works with anacron/cron**: I set it up to run automatically on my laptop
@@ -57,7 +57,7 @@ This opens an interactive menu where you can select individual tasks or run all 
 **Automated Mode:**
 
 ```bash
-python maintenance.py auto
+python maintenance.py --auto
 ```
 
 This runs all maintenance tasks without any user interaction, perfect for automation.
@@ -82,7 +82,7 @@ If you know your system will always be powered on at certain times, a cron job w
    cd /home/username/path/to/linux-maintenance
    
    # Run maintenance script in auto mode
-   ./maintenance.py auto >> logs/maintenance.log 2>&1
+   ./maintenance.py --auto >> logs/maintenance.log 2>&1
    ```
 
 2. **Make the wrapper executable:**

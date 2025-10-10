@@ -10,6 +10,21 @@ from desktop_notifier import DesktopNotifier, Urgency
 import logging
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
+import argparse
+
+# Setup argument parser
+parser = argparse.ArgumentParser(
+    description="Linux Maintenance Script"
+    )
+parser.add_argument(
+    "--version", action="version",
+    version="Linux Maintenance version 0.4.4"
+    )
+parser.add_argument(
+    "--auto", action="store_true",
+    help="Run all maintenance tasks automatically without prompts"
+)
+args = parser.parse_args()
 
 # Setup logging
 log_path = Path(__file__).parent / "logs" / "maintenance.log"
@@ -351,9 +366,7 @@ def main() -> None:
 
 # Entry point for the script, runs main() if executed directly
 if __name__ == "__main__":
-    import sys
-    # Skips menu if 'auto' is passed as an argument
-    if len(sys.argv) > 1 and sys.argv[1] == "auto":
+    if args.auto:
         run_all_tasks()
     else:
         main()
