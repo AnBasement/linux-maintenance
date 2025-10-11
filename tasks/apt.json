@@ -1,0 +1,92 @@
+{
+  "tasks": [
+    {
+        "name": "Update package lists",
+        "description": "Update package lists from repositories",
+        "command": ["sudo", "apt", "update"],
+        "auto_safe": true,
+        "risk_level": "low",
+        "requires_sudo": true
+    },
+    {
+        "name": "Upgrade packages",
+        "description": "Upgrade installed packages to their latest versions",
+        "command": ["sudo", "apt", "upgrade", "-y"],
+        "auto_safe": false,
+        "risk_level": "medium",
+        "requires_sudo": true
+    },
+    {
+        "name": "Remove unnecessary packages",
+        "description": "Remove packages that are no longer needed",
+        "command": ["sudo", "apt", "autoremove", "-y"],
+        "auto_safe": true,
+        "risk_level": "low",
+        "requires_sudo": true
+    },
+    {
+        "name": "Autoclean package cache",
+        "description": "Remove obsolete package files",
+        "command": ["sudo", "apt", "autoclean"],
+        "auto_safe": true,
+        "risk_level": "low",
+        "requires_sudo": true
+    },
+    {
+        "name": "List upgradable packages",
+        "description": "Display upgradable packages",
+        "command": ["apt", "list", "--upgradable"],
+        "auto_safe": true,
+        "risk_level": "low",
+        "requires_sudo": false
+    },
+    {
+        "name": "Clear cached packages",
+        "description": "Remove all cached package files",
+        "command": ["sudo", "apt", "clean"],
+        "auto_safe": false,
+        "risk_level": "medium",
+        "requires_sudo": true
+    },
+    {
+        "name": "Dist-upgrade packages",
+        "description": "Handle dependency changes during package upgrades",
+        "command": ["sudo", "apt", "dist-upgrade", "-y"],
+        "auto_safe": false,
+        "risk_level": "medium",
+        "requires_sudo": true
+    },
+    {
+        "name": "Leftover configs",
+        "description": "lists removed packages with leftover config files",
+        "command": ["dpkg", "--list", "|", "grep", "^rc"],
+        "auto_safe": false,
+        "risk_level": "medium",
+        "requires_sudo": false
+    },
+    {
+        "name": "Purge leftover configs",
+        "description": "Purge config files of removed packages",
+        "command": ["sudo", "apt", "purge", "$(dpkg -l | grep '^rc' | awk '{print $2}')"],
+        "auto_safe": false,
+        "risk_level": "medium",
+        "requires_sudo": true
+    },
+    {
+        "name": "Check reboot required",
+        "description": "Display what needs restarting after updates",
+        "command": ["sudo", "needrestart", "-r", "l"],
+        "auto_safe": false,
+        "risk_level": "medium",
+        "requires_sudo": true
+    },
+    {
+        "name": "Orphaned libraries",
+        "description": "Find orphaned libraries",
+        "command": ["sudo", "deborphan"],
+        "auto_safe": false,
+        "risk_level": "medium",
+        "requires_sudo": true
+    }
+  ]
+}
