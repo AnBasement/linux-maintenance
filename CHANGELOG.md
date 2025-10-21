@@ -6,6 +6,17 @@ All notable changes to the project will be documented here.
 The format is based on [Keep a Changelog v1.1.0](https://keepachangelog.com/en/1.1.0/),
 and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2025-10-21
+
+### Added
+
+- Implemented dynamic JSON task loading: tasks are now loaded from `base.json`, `apt.json`, and `optional.json` instead of being hardcoded into `maintenance.py`.
+- Added `load_tasks_from_json()` and `load_all_tasks()` functions.
+
+### Changed
+
+- Refactored `run_all_tasks()` and `main()` to use loaded tasks for both interactive and automated modes.
+
 ## [0.4.5] - 2025-10-10
 
 ### Added
