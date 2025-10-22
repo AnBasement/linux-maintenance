@@ -453,12 +453,19 @@ def main() -> None:
                 if requires_sudo and os.geteuid() != 0:
                     logger.warning(f"Task '{task['name']}' requires sudo but not running as root")
                     print(Panel.fit(
-                        f"[red]Task '{task['name']}' requires sudo but script is not running as root.[/red]",
-                        border_style="red"
+                        f"[yellow]Task '{task['name']}' requires sudo. "
+                        "Would you like to rerun this command with sudo? (y/n)[/yellow]",
+                        border_style="yellow"
                     ))
-                    return
-
-                exit_code, output, error = run_command(task["command"])
+                    resp = input("Run with sudo? [y/N]: ").strip().lower()
+                    if resp == "y":
+                        cmd_with_sudo = ["sudo"] + task["command"] if task["command"][0] != "sudo" else task["command"]
+                        exit_code, output, error = run_command(cmd_with_sudo)
+                    else:
+                        print(Panel.fit("[red]Task skipped.[/red]", border_style="red"))
+                        continue
+                else:
+                    exit_code, output, error = run_command(task["command"])
 
                 # Summarize output
                 task_name = task["name"].lower()
