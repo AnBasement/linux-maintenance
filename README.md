@@ -4,7 +4,7 @@ This maintenance script started as a personal project to re-acquaint myself with
 
 It currently automates some common system maintenance tasks, like updating packages and clearing caches. Further options are planned for the future.
 
-I want to stress that I wont take responsibility for anything going wrong if you test this out. While the script itself should be entirely safe, the automated nature of it does mean you will not be presented with a list of packages to be updated, for instance, as all tasks requiring input have a `-y` flag. You'll have to check the logs to see what packages were upgraded.
+I want to stress that I wont take responsibility for anything going wrong if you test this out. While the script itself should be entirely safe, the automated nature of it does mean changes can be made to your system without any input other than running the script. By default, only a handful of safe tasks are performed automatically.
 
 ## What it does
 
@@ -12,7 +12,7 @@ I want to stress that I wont take responsibility for anything going wrong if you
 - **Auto mode**: Run everything at once with `python maintenance.py --auto` - good for scheduling
 - **Desktop notifications**: Pops up notifications when stuff finishes (or breaks)
 - **Basic logging**: Saves what happened to `logs/maintenance.log` so you can see what went wrong
-- **Works with anacron/cron**: I set it up to run automatically on my laptop
+- **Works with anacron/cron**: I set it up to run automatically on my laptop with anacron.
 
 ## Installation
 
