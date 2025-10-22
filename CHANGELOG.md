@@ -6,6 +6,14 @@ All notable changes to the project will be documented here.
 The format is based on [Keep a Changelog v1.1.0](https://keepachangelog.com/en/1.1.0/),
 and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2025-10-XX
+
+### Added
+
+- Implemented package manager detection: the script now automatically detects the available package manager (`apt`, `dnf`, `pacman`, or `zypper`) and loads tasks from the corresponding JSON file.
+  - Note: Missing json files will be added at a later stage.
+- Updated task loading logic to support multi-distro setups and future expansion.
+
 ## [0.5.0] - 2025-10-21
 
 ### Added
