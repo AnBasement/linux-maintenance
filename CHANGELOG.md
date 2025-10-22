@@ -6,7 +6,7 @@ All notable changes to the project will be documented here.
 The format is based on [Keep a Changelog v1.1.0](https://keepachangelog.com/en/1.1.0/),
 and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.6.2] - 2025-10-22
 
 ### Added
 
@@ -25,6 +25,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - Changed `auto_safe: false` for "Remove unused Flatpak runtimes" in `optional.json` (removes runtimes).
   - Changed `auto_safe: false` for "Update Snap packages" in `optional.json` (updates packages).
 - Shortened description for task "Remove unnecessary packages" in `apt.json` to improve rich table display.
+- Set a default width for "No." column to ensure it always displays.
 
 ### Removed
 
