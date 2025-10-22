@@ -414,7 +414,7 @@ def main() -> None:
                     ))
                     resp = input("Run with sudo? [y/N]: ").strip().lower()
                     if resp == "y":
-                        cmd_with_sudo = ["sudo"] + task["command"] if task["command"][0] != "sudo" else task["command"]
+                        cmd_with_sudo = task["command"] if task["command"] and task["command"][0] == "sudo" else ["sudo"] + task["command"]
                         exit_code, output, error = run_command(cmd_with_sudo)
                     else:
                         print(Panel.fit("[red]Task skipped.[/red]", border_style="red"))
