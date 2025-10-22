@@ -369,7 +369,7 @@ def main() -> None:
 
     # Build menu table from loaded tasks
     menu_table = Table(title="Linux Maintenance")
-    menu_table.add_column("No.", justify="center", no_wrap=True)
+    menu_table.add_column("No.", width=20, justify="center", no_wrap=True)
     menu_table.add_column("Task", justify="center", no_wrap=True)
     menu_table.add_column("Description", justify="center", no_wrap=True)
     menu_table.add_column("Command", justify="center", no_wrap=True)
