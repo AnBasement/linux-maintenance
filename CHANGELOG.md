@@ -131,6 +131,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Fixed duplicated log entries; cleaned up command success/error logging.
 
+---
+
 ## [0.4.0] - 2025-10-08
 
 ### Added
@@ -230,7 +232,9 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Automated bump script for patch/minor/major releases
 - VERSION file for version tracking
 
-## [0.1] - 2025-10-04
+---
+
+## [0.0.1] - 2025-10-04
 
 ### Features
 
