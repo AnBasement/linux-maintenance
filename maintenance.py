@@ -11,6 +11,7 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 import argparse
+import json
 
 # Setup argument parser
 version_file = Path(__file__).parent / "VERSION"
@@ -20,16 +21,16 @@ if version_file.exists():
 else:
     version_str = "unknown"
 
-parser = argparse.ArgumentParser(
-    description="Linux Maintenance Script"
+parser = argparse.ArgumentParser(description="Linux Maintenance Script")
+parser.add_argument(
+    "--version",
+    action="version",
+    version=f"Linux Maintenance Script version {version_str}",
 )
 parser.add_argument(
-    "--version", action="version",
-    version=f"Linux Maintenance Script version {version_str}"
-)
-parser.add_argument(
-    "--auto", action="store_true",
-    help="Run all maintenance tasks automatically without prompts"
+    "--auto",
+    action="store_true",
+    help="Run all maintenance tasks automatically without prompts",
 )
 args = parser.parse_args()
 
@@ -44,19 +45,17 @@ logger.setLevel(logging.INFO)
 if not any(isinstance(h, TimedRotatingFileHandler) for h in logger.handlers):
     handler = TimedRotatingFileHandler(
         log_path,
-        when="W2",           # Rotate every Wednesday
-        backupCount=4,       # Keep 4 backups
-        encoding="utf-8"
+        when="W2",  # Rotate every Wednesday
+        backupCount=4,  # Keep 4 backups
+        encoding="utf-8",
     )
     handler.setLevel(logging.INFO)
-    handler.setFormatter(logging.Formatter(
-        "%(asctime)s [%(levelname)s] %(message)s"
-    ))
+    handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
     logger.addHandler(handler)
 
 logger.propagate = False
 
-__version__ = "0.4.5"
+__version__ = "0.5.0"
 
 console = Console()
 
@@ -79,32 +78,34 @@ table.add_row(
     "1",
     "Update package lists",
     "Fetches the latest information about available packages and updates.",
-    "sudo apt update"
-    )
+    "sudo apt update",
+)
 table.add_row(
     "2",
     "Upgrade packages",
     "Installs newer versions of all currently installed packages.",
-    "sudo apt upgrade -y"
+    "sudo apt upgrade -y",
 )
 table.add_row(
     "3",
     "Remove unused packages",
-    ("Cleans up packages that were automatically installed and are no "
-     "longer required"),
-    "sudo apt autoremove -y"
+    (
+        "Cleans up packages that were automatically installed and are no "
+        "longer required"
+    ),
+    "sudo apt autoremove -y",
 )
 table.add_row(
     "4",
     "Clean apt cache",
     "Frees up disk space by deleting cached package files.",
-    "sudo apt autoclean -y"
+    "sudo apt autoclean -y",
 )
 table.add_row(
     "5",
     "List available updates",
     "Shows packages that can be updated (safe read-only check).",
-    "apt list --upgradable"
+    "apt list --upgradable",
 )
 
 
@@ -142,20 +143,54 @@ def send_notification(title, message, urgency=Urgency.Normal):
     """Send a desktop notification."""
     try:
         notifier = DesktopNotifier(app_name="Linux Maintenance")
-        asyncio.run(
-            notifier.send(title=title, message=message, urgency=urgency)
-            )
+        asyncio.run(notifier.send(title=title, message=message, urgency=urgency))
     except RuntimeError as e:
         logger.warning(f"Notification failed: {e}")
+
+
+def load_tasks_from_json(file_path: Path) -> list[dict]:
+    """Load tasks from a JSON file."""
+
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            tasks = data.get("tasks", [])
+            logger.info(f"Loaded {len(tasks)} tasks from {file_path}")
+            return tasks
+    except FileNotFoundError:
+        logger.warning(f"Task file not found: {file_path}")
+        return []
+    except json.JSONDecodeError as e:
+        logger.error(f"Invalid JSON in {file_path}: {e}")
+        return []
+    except Exception as e:
+        logger.error(f"Error loading {file_path}: {e}")
+        return []
+
+
+def load_all_tasks() -> list[dict]:
+    """Load all applicable task files."""
+    tasks_dir = Path(__file__).parent / "tasks"
+    all_tasks = []
+
+    base_tasks = load_tasks_from_json(tasks_dir / "base.json")
+    all_tasks.extend(base_tasks)
+
+    apt_tasks = load_tasks_from_json(tasks_dir / "apt.json")
+    all_tasks.extend(apt_tasks)
+
+    optional_tasks = load_tasks_from_json(tasks_dir / "optional.json")
+    all_tasks.extend(optional_tasks)
+
+    logger.info(f"Total tasks loaded: {len(all_tasks)}")
+    return all_tasks
 
 
 def run_command(cmd: list[str]) -> tuple[int, str, str]:
     """Execute a command and handle errors if any. Returns exit code."""
     logger.info(f"Executing: {' '.join(cmd)}")
     try:
-        result = subprocess.run(
-            cmd, capture_output=True, text=True, check=True
-            )
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
 
         output = result.stdout.strip()
         error = result.stderr.strip()
@@ -183,64 +218,79 @@ def run_command(cmd: list[str]) -> tuple[int, str, str]:
 
 
 def run_all_tasks() -> None:
-    """Runs all maintenance tasks in sequence and displays a summary.
-    Stops if any task fails."""
-    tasks = {
-        "Update": ["sudo", "apt", "update"],
-        "Upgrade": ["sudo", "apt", "upgrade", "-y"],
-        "Remove": ["sudo", "apt", "autoremove", "-y"],
-        "Clean": ["sudo", "apt", "autoclean", "-y"]
-    }
+    """Run all maintenance tasks."""
+    all_tasks = load_all_tasks()
 
+    if not all_tasks:
+        logger.error("No tasks loaded!")
+        print(
+            Panel.fit("[red]Error: No tasks could be loaded.[/red]", border_style="red")
+        )
+        return
+
+    auto_tasks = [task for task in all_tasks if task.get("auto_safe", False)]
+
+    if not auto_tasks:
+        logger.warning("No auto-safe tasks found")
+        return
+
+    logger.info(f"Starting automated run with {len(auto_tasks)} tasks")
     results_list = []
 
-    send_notification("Maintenance Started", "Running all maintenance tasks.")
-    logger.info("Maintenance started.")
+    send_notification(
+        "Maintenance Started", f"Running {len(auto_tasks)} automated tasks"
+    )
 
     with console.status(
-            "[bold green]Starting maintenance tasks...[/bold green]"
-            ) as status:
+        "[bold green]Starting maintenance tasks...[/bold green]"
+    ) as status:
+        for task_counter, task in enumerate(auto_tasks, start=1):
+            task_name = task["name"]
+            command_list = task["command"]
 
-        for task_counter, (task_name, command_list) in enumerate(
-                tasks.items(), start=1):
-            status.update(f"Task {task_counter} of {len(tasks)}: {task_name}")
-            logger.info(
-                f"Running task {task_counter}/{len(tasks)}: {task_name}"
-                )
+            status.update(f"Task {task_counter} of {len(auto_tasks)}: {task_name}")
+            logger.info(f"Running task {task_counter}/{len(auto_tasks)}: {task_name}")
 
             exit_code, output, error = run_command(command_list)
 
-            if task_name == "Update":
+            if "update" in task_name.lower():
                 processed_output = summarize_update_output(output)
-            elif task_name == "Upgrade":
+            elif "upgrade" in task_name.lower():
                 processed_output = summarize_upgrade_output(output)
-            elif task_name == "Remove":
+            elif "remove" in task_name.lower():
                 processed_output = summarize_remove_output(output)
-            elif task_name == "Clean":
-                processed_output = "-"
+            else:
+                processed_output = output if output else "-"
 
-            results_list.append({
-                "command": task_name,
-                "exit_code": ("[bold green]✓[/bold green]" if exit_code == 0
-                              else "[bold red]✗[/bold red]"),
-                "output": processed_output,
-                "error": error if exit_code != 0 else ""
-                })
+            results_list.append(
+                {
+                    "command": task_name,
+                    "exit_code": (
+                        "[bold green]✓[/bold green]"
+                        if exit_code == 0
+                        else "[bold red]✗[/bold red]"
+                    ),
+                    "output": processed_output,
+                    "error": error if exit_code != 0 else "",
+                }
+            )
 
             if exit_code != 0:
                 logger.error(f"Task '{task_name}' failed: {error}")
                 send_notification(
                     "Maintenance Error",
                     f"Task '{task_name}' encountered an error.",
-                    Urgency.Critical
+                    Urgency.Critical,
+                )
+                print(
+                    Panel.fit(
+                        "[red]✖ Task failed, cancelling action.[/red]",
+                        border_style="red",
                     )
-                print(Panel.fit(
-                    "[red]✖ Task failed, cancelling action.[/red]",
-                    border_style="red"))
+                )
                 break
 
     all_tasks_table = Table(title="Maintenance Summary")
-
     all_tasks_table.add_column("Task", justify="left", no_wrap=True)
     all_tasks_table.add_column("Exit Code", justify="center", no_wrap=True)
     all_tasks_table.add_column("Details", justify="left")
@@ -251,103 +301,121 @@ def run_all_tasks() -> None:
             result["command"],
             str(result["exit_code"]),
             result["output"] if result["output"] else "-",
-            result["error"] if result["error"] else "-"
+            result["error"] if result["error"] else "-",
         )
 
-    send_notification(
-        "Maintenance Complete",
-        f"{len(results_list)} tasks have been processed.",
-        Urgency.Critical
-        )
+    send_notification("Maintenance Complete", f"{len(results_list)} tasks processed.")
     print(all_tasks_table)
 
 
 def main() -> None:
-    """Main function. Prints table and takes user input. Runs commands based
-    on input."""
-    print(table)
+    """Main function. Prints table and takes user input."""
+    # Load all available tasks
+    all_tasks = load_all_tasks()
+
+    if not all_tasks:
+        print(
+            Panel.fit("[red]Error: No tasks could be loaded.[/red]", border_style="red")
+        )
+        return
+
+    # Build menu table from loaded tasks
+    menu_table = Table(title="Linux Maintenance")
+    menu_table.add_column("No.", justify="center", no_wrap=True)
+    menu_table.add_column("Task", justify="center", no_wrap=True)
+    menu_table.add_column("Description", justify="center", no_wrap=True)
+    menu_table.add_column("Command", justify="center", no_wrap=True)
+
+    for idx, task in enumerate(all_tasks, start=1):
+        menu_table.add_row(
+            str(idx), task["name"], task["description"], " ".join(task["command"])
+        )
+
+    print(menu_table)
     first_run = True
+
     while True:
         if first_run:
-            print(Panel.fit(
-                "[yellow]Most tasks require sudo privileges.[/yellow]",
-                border_style="yellow"
-            ))
+            print(
+                Panel.fit(
+                    "[yellow]Most tasks require sudo privileges.[/yellow]",
+                    border_style="yellow",
+                )
+            )
             first_run = False
 
+        max_choice = len(all_tasks)
         selection = input(
-            "Linux Maintenance\n"
-            "=================\n"
-            "Select which task to perform (1-5), 'all' "
-            "to run full suite or 'q' to quit: ")
-        commands = {
-            "1": ["sudo", "apt", "update"],
-            "2": ["sudo", "apt", "upgrade", "-y"],
-            "3": ["sudo", "apt", "autoremove", "-y"],
-            "4": ["sudo", "apt", "autoclean", "-y"],
-            "5": ["apt", "list", "--upgradable"],
-        }
+            f"Linux Maintenance\n"
+            f"=================\n"
+            f"Select task (1-{max_choice}), 'all' for full suite, or 'q' to quit: "
+        )
 
-        if selection in commands:
-            exit_code, output, error = run_command(commands[selection])
-            # Use summary helpers for upgrade/remove
-            if selection == "1":
-                summary = summarize_update_output(output)
-            elif selection == "2":
-                summary = summarize_upgrade_output(output)
-            elif selection == "3":
-                summary = summarize_remove_output(output)
+        # Handle numeric selection
+        if selection.isdigit():
+            choice_num = int(selection)
+            if 1 <= choice_num <= max_choice:
+                task = all_tasks[choice_num - 1]
+                exit_code, output, error = run_command(task["command"])
+
+                # Summarize output
+                task_name = task["name"].lower()
+                if "update" in task_name:
+                    summary = summarize_update_output(output)
+                elif "upgrade" in task_name:
+                    summary = summarize_upgrade_output(output)
+                elif "remove" in task_name:
+                    summary = summarize_remove_output(output)
+                else:
+                    summary = output if output else "-"
+
+                if exit_code == 0:
+                    send_notification(
+                        "Task Completed", f"'{task['name']}' completed successfully."
+                    )
+                    print(
+                        Panel.fit(
+                            f"[green]✓ Task completed successfully.[/green]\n[white]{summary}[/white]",
+                            border_style="green",
+                        )
+                    )
+                else:
+                    send_notification(
+                        "Task Error",
+                        f"'{task['name']}' encountered an error.",
+                        Urgency.Critical,
+                    )
+                    print(
+                        Panel.fit(
+                            "[yellow]Task encountered an error.[/yellow]",
+                            border_style="yellow",
+                        )
+                    )
             else:
-                summary = output
-            if exit_code == 0:
-                send_notification(
-                    "Task Completed",
-                    f"Command '{' '.join(commands[selection])}' "
-                    f"completed successfully."
-                )
-                print(Panel.fit(
-                    f"[green]✓ Task completed successfully.[/green]\n"
-                    f"[white]{summary}[/white]",
-                    border_style="green"
-                ))
-            else:
-                send_notification(
-                    "Task Error",
-                    f"Command '{' '.join(commands[selection])}' "
-                    f"encountered an error.",
-                    Urgency.Critical
-                )
-                print(Panel.fit(
-                    "[yellow]Task encountered an error.[/yellow]",
-                    border_style="yellow"))
+                print(f"Invalid selection. Please choose 1-{max_choice}.")
 
         elif selection == "all":
             run_all_tasks()
-            continue
         elif selection.lower() == "q":
             print(Panel.fit("Exiting..."))
             break
         elif selection == "test":
-            print(Panel.fit(
-                "\n[cyan]  Running error handling tests...  [/cyan]\n"
-                ))
+            print(Panel.fit("\n[cyan]  Running error handling tests...  [/cyan]\n"))
 
             print(Panel.fit("1. Testing success (exit 0):"))
             exit_code, output, error = run_command(["true"])
             send_notification(
                 "Test Completed",
                 "Test command 'true' completed successfully.",
-                Urgency.Normal
-                )
+                Urgency.Normal,
+            )
             print(Panel.fit(f"Returned: {exit_code}"))
 
             print(Panel.fit("2. Testing failure (exit 1):"))
             exit_code, output, error = run_command(["false"])
             send_notification(
-                "Test Completed",
-                "Test command 'false' failed.",
-                Urgency.Critical
-                )
+                "Test Completed", "Test command 'false' failed.", Urgency.Critical
+            )
             print(Panel.fit(f"Returned: {exit_code}"))
 
             print(Panel.fit("3. Testing FileNotFoundError:"))
@@ -356,18 +424,12 @@ def main() -> None:
             send_notification(
                 "Test Completed",
                 "Test command 'this-does-not-exist' failed.",
-                Urgency.Critical
-                )
-
-            print(Panel.fit(
-                "[green]✓ Tests complete![/green]",
-                border_style="green"
-            ))
-        else:
-            print(
-                "Invalid selection, please choose a number between 1 and 5 "
-                "or type q to quit."
+                Urgency.Critical,
             )
+
+            print(Panel.fit("[green]✓ Tests complete![/green]", border_style="green"))
+        else:
+            print(f"Invalid selection. Please choose 1-{max_choice} or 'q' to quit.")
 
 
 # Entry point for the script, runs main() if executed directly

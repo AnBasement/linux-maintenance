@@ -1,0 +1,52 @@
+{
+    "tasks": [
+        {
+            "name": "Update Flatpak apps",
+            "description": "Update all installed Flatpak applications",
+            "command": ["flatpak", "update", "-y"],
+            "auto_safe": true,
+            "risk_level": "medium",
+            "requires_sudo": false
+        },
+        {
+            "name": "Remove unused Flatpak runtimes",
+            "description": "Remove unused Flatpak runtimes and extensions",
+            "command": ["flatpak", "uninstall", "--unused", "-y"],
+            "auto_safe": true,
+            "risk_level": "low",
+            "requires_sudo": false
+        },
+        {
+            "name": "Update Snap packages",
+            "description": "Update all installed Snap packages",
+            "command": ["snap", "refresh"],
+            "auto_safe": true,
+            "risk_level": "medium",
+            "requires_sudo": false
+        },
+        {
+            "name": "Show snap revisions",
+            "description": "Show all installed Snap package revisions",
+            "command": ["snap", "list", "--all"],
+            "auto_safe": false,
+            "risk_level": "low",
+            "requires_sudo": false
+        },
+        {
+            "name": "Remove old snap revisions",
+            "description": "Remove old revisions of Snap packages, keeping the latest 2",
+            "command": ["snap", "remove", "$(snap", "list", "--all", "|", "awk", "'/disabled/{print $1, $3}')"],
+            "auto_safe": false,
+            "risk_level": "medium",
+            "requires_sudo": false
+        },
+        {
+            "name": "Docker disk usage",
+            "description": "Show Docker disk usage",
+            "command": ["docker", "system", "df"],
+            "auto_safe": false,
+            "risk_level": "low",
+            "requires_sudo": false
+        }
+    ]
+}
