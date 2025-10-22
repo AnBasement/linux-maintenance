@@ -3,7 +3,7 @@
     {
         "name": "Vacuum system logs",
         "description": "Keep only last 30 days of system logs",
-        "command": ["journalctl", "--vacuum-time=30d"],
+        "command": ["sudo", "journalctl", "--vacuum-time=30d"],
         "auto_safe": true,
         "risk_level": "low",
         "requires_sudo": true
@@ -15,7 +15,7 @@
         "command": ["sudo", "updatedb"],
         "auto_safe": true,
         "risk_level": "low",
-        "requires_sudo": false
+        "requires_sudo": true
     },
     {
         "name": "Show failed services",
