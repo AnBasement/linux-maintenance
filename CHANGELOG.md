@@ -27,6 +27,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - `Check user cache size`, `Clear thumbnail cache` from `base.json`.
   - `Remove old snap revisions` from `optional.json`.
 
+### Fixed
+
+- Fixing some sudo inconsistencies for `vacuum system logs` and `update file database` tasks in `base.json`.
+
 ## [0.6.1] - 2025-10-22
 
 ### Added
