@@ -12,6 +12,7 @@ from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 import argparse
 import json
+import os
 
 # Setup argument parser
 version_file = Path(__file__).parent / "VERSION"
@@ -55,7 +56,7 @@ if not any(isinstance(h, TimedRotatingFileHandler) for h in logger.handlers):
 
 logger.propagate = False
 
-__version__ = "0.6.0"
+__version__ = "0.6.2"
 
 console = Console()
 
@@ -63,50 +64,6 @@ notifier = DesktopNotifier(app_name="Linux Maintenance")
 
 # Script that provides reminders to perform certain regular maintenance
 # tasks on a Linux distribution.
-
-# Create table to display maintenance tasks
-table = Table(title="Linux Maintenance")
-
-# Add columns for task name, description and command
-table.add_column("No.", justify="center", no_wrap=True)
-table.add_column("Task", justify="center", no_wrap=True)
-table.add_column("Description", justify="center", no_wrap=True)
-table.add_column("Command", justify="center", no_wrap=True)
-
-# Add rows for the various tasks
-table.add_row(
-    "1",
-    "Update package lists",
-    "Fetches the latest information about available packages and updates.",
-    "sudo apt update",
-)
-table.add_row(
-    "2",
-    "Upgrade packages",
-    "Installs newer versions of all currently installed packages.",
-    "sudo apt upgrade -y",
-)
-table.add_row(
-    "3",
-    "Remove unused packages",
-    (
-        "Cleans up packages that were automatically installed and are no "
-        "longer required"
-    ),
-    "sudo apt autoremove -y",
-)
-table.add_row(
-    "4",
-    "Clean apt cache",
-    "Frees up disk space by deleting cached package files.",
-    "sudo apt autoclean -y",
-)
-table.add_row(
-    "5",
-    "List available updates",
-    "Shows packages that can be updated (safe read-only check).",
-    "apt list --upgradable",
-)
 
 
 def summarize_update_output(output: str) -> str:
@@ -150,13 +107,23 @@ def send_notification(title, message, urgency=Urgency.Normal):
 
 def load_tasks_from_json(file_path: Path) -> list[dict]:
     """Load tasks from a JSON file."""
-
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-            tasks = data.get("tasks", [])
-            logger.info(f"Loaded {len(tasks)} tasks from {file_path}")
-            return tasks
+            raw_tasks = data.get('tasks', [])
+
+            valid_tasks = []
+            for idx, task in enumerate(raw_tasks):
+                is_valid, error_msg = validate_task(task)
+                if is_valid:
+                    valid_tasks.append(task)
+                else:
+                    logger.error(f"Invalid task at index {idx} in {file_path.name}: {error_msg}")
+                    logger.debug(f"Problematic task data: {task}")
+
+            logger.info(f"Loaded {len(valid_tasks)}/{len(raw_tasks)} valid tasks from {file_path.name}")
+            return valid_tasks
+
     except FileNotFoundError:
         logger.warning(f"Task file not found: {file_path}")
         return []
@@ -211,6 +178,49 @@ def detect_package_manager() -> str | None:
 
     logger.warning("No supported package manager detected")
     return None
+
+
+def validate_task(task: dict) -> tuple[bool, str]:
+    """
+    Validate that a task has all required fields with correct types.
+
+    Returns:
+        (is_valid, error_message)
+    """
+    required_fields = ['name', 'description', 'command']
+    for field in required_fields:
+        if field not in task:
+            return (False, f"Missing required field: {field}")
+
+    if not isinstance(task['name'], str) or not task['name'].strip():
+        return (False, "Field 'name' must be a non-empty string")
+
+    if not isinstance(task['description'], str) or not task['description'].strip():
+        return (False, "Field 'description' must be a non-empty string")
+
+    if not isinstance(task['command'], list) or len(task['command']) == 0:
+        return (False, "Field 'command' must be a non-empty list")
+
+    for idx, item in enumerate(task['command']):
+        if not isinstance(item, str):
+            return (False, f"Command item at index {idx} must be a string, got {type(item).__name__}")
+
+    if 'auto_safe' in task and not isinstance(task['auto_safe'], bool):
+        return (False, "Field 'auto_safe' must be a boolean")
+
+    if 'requires_sudo' in task and not isinstance(task['requires_sudo'], bool):
+        return (False, "Field 'requires_sudo' must be a boolean")
+
+    if 'risk_level' in task:
+        valid_levels = ['low', 'medium', 'high']
+        if task['risk_level'] not in valid_levels:
+            return (False, f"Field 'risk_level' must be one of {valid_levels}")
+
+    if 'check_command' in task:
+        if not isinstance(task['check_command'], list):
+            return (False, "Field 'check_command' must be a list")
+
+    return (True, "")
 
 
 def run_command(cmd: list[str]) -> tuple[int, str, str]:
@@ -274,6 +284,17 @@ def run_all_tasks() -> None:
         for task_counter, task in enumerate(auto_tasks, start=1):
             task_name = task["name"]
             command_list = task["command"]
+
+            # Sudo check
+            requires_sudo = task.get('requires_sudo', False)
+
+            if requires_sudo and os.geteuid() != 0:
+                logger.warning(f"Task '{task_name}' requires sudo but not running as root")
+                print(Panel.fit(
+                    f"[red]Task '{task_name}' requires sudo but script is not running as root.[/red]",
+                    border_style="red"
+                ))
+                continue
 
             status.update(f"Task {task_counter} of {len(auto_tasks)}: {task_name}")
             logger.info(f"Running task {task_counter}/{len(auto_tasks)}: {task_name}")
@@ -348,7 +369,7 @@ def main() -> None:
 
     # Build menu table from loaded tasks
     menu_table = Table(title="Linux Maintenance")
-    menu_table.add_column("No.", justify="center", no_wrap=True)
+    menu_table.add_column("No.", width=20, justify="center", no_wrap=True)
     menu_table.add_column("Task", justify="center", no_wrap=True)
     menu_table.add_column("Description", justify="center", no_wrap=True)
     menu_table.add_column("Command", justify="center", no_wrap=True)
@@ -357,7 +378,6 @@ def main() -> None:
         menu_table.add_row(
             str(idx), task["name"], task["description"], " ".join(task["command"])
         )
-
     print(menu_table)
     first_run = True
 
@@ -383,7 +403,24 @@ def main() -> None:
             choice_num = int(selection)
             if 1 <= choice_num <= max_choice:
                 task = all_tasks[choice_num - 1]
-                exit_code, output, error = run_command(task["command"])
+                requires_sudo = task.get('requires_sudo', False)
+
+                if requires_sudo and os.geteuid() != 0:
+                    logger.warning(f"Task '{task['name']}' requires sudo but not running as root")
+                    print(Panel.fit(
+                        f"[yellow]Task '{task['name']}' requires sudo. "
+                        "Would you like to rerun this command with sudo? (y/n)[/yellow]",
+                        border_style="yellow"
+                    ))
+                    resp = input("Run with sudo? [y/N]: ").strip().lower()
+                    if resp == "y":
+                        cmd_with_sudo = ["sudo"] + task["command"] if task["command"][0] != "sudo" else task["command"]
+                        exit_code, output, error = run_command(cmd_with_sudo)
+                    else:
+                        print(Panel.fit("[red]Task skipped.[/red]", border_style="red"))
+                        continue
+                else:
+                    exit_code, output, error = run_command(task["command"])
 
                 # Summarize output
                 task_name = task["name"].lower()

@@ -18,10 +18,10 @@
     },
     {
         "name": "Remove unnecessary packages",
-        "description": "Remove packages that are no longer needed",
+        "description": "Remove unused dependency packages",
         "command": ["sudo", "apt", "autoremove", "-y"],
-        "auto_safe": true,
-        "risk_level": "low",
+        "auto_safe": false,
+        "risk_level": "medium",
         "requires_sudo": true
     },
     {
@@ -57,23 +57,8 @@
         "requires_sudo": true
     },
     {
-        "name": "Leftover configs",
-        "description": "lists removed packages with leftover config files",
-        "command": ["dpkg", "--list", "|", "grep", "^rc"],
-        "auto_safe": false,
-        "risk_level": "medium",
-        "requires_sudo": false
-    },
-    {
-        "name": "Purge leftover configs",
-        "description": "Purge config files of removed packages",
-        "command": ["sudo", "apt", "purge", "$(dpkg -l | grep '^rc' | awk '{print $2}')"],
-        "auto_safe": false,
-        "risk_level": "medium",
-        "requires_sudo": true
-    },
-    {
         "name": "Check reboot required",
+        "check_command": ["which", "needrestart"],
         "description": "Display what needs restarting after updates",
         "command": ["sudo", "needrestart", "-r", "l"],
         "auto_safe": false,
@@ -82,6 +67,7 @@
     },
     {
         "name": "Orphaned libraries",
+        "check_command": ["which", "deborphan"],
         "description": "Find orphaned libraries",
         "command": ["sudo", "deborphan"],
         "auto_safe": false,

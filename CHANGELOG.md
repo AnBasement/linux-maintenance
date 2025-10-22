@@ -6,13 +6,56 @@ All notable changes to the project will be documented here.
 The format is based on [Keep a Changelog v1.1.0](https://keepachangelog.com/en/1.1.0/),
 and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.6.0] - 2025-10-XX
+## [0.6.2] - 2025-10-22
+
+### Added
+
+- Added a check for `requires_sudo` to `run_all_tasks()` and `main()`.
+  - If `requires_sudo` is `true` in `run_all_tasks()`, the task is skipped. In `main()`, the user is prompted to rerun command with sudo.
+
+### Changed
+
+- Added `check_command` fields to a handful of relevant tasks.
+  - "Check reboot required" and "Orphaned libraries" in `apt.json`.
+  - "Update file database" in `base.json`.
+  - All tasks in `optional.json`.
+- Corrected `auto_safe` values to be more conservative for automated runs.
+  - Changed `auto_safe: false` for "Remove unnecessary packages" in `apt.json` (removes packages).
+  - Changed `auto_safe: false` for "Update Flatpak apps" in `optional.json` (updates packages).
+  - Changed `auto_safe: false` for "Remove unused Flatpak runtimes" in `optional.json` (removes runtimes).
+  - Changed `auto_safe: false` for "Update Snap packages" in `optional.json` (updates packages).
+- Shortened description for task "Remove unnecessary packages" in `apt.json` to improve rich table display.
+- Set a default width for "No." column to ensure it always displays.
+
+### Removed
+
+- Removing some shell-dependent commands from JSON for now.
+  - "Leftover configs", "Purge leftover configs" from `apt.json`.
+  - "Check user cache size", "Clear thumbnail cache" from `base.json`.
+  - "Remove old snap revisions" from `optional.json`.
+- Removed old code for a table that is no longer in use.
+
+### Fixed
+
+- Fixing some sudo inconsistencies for "Vacuum system logs" and "Update file database" tasks in `base.json`.
+
+## [0.6.1] - 2025-10-22
+
+### Added
+
+- Implemented task validation for all tasks in JSON files. Checks required fields and correct types to prevent errors and task skipping.
+
+---
+
+## [0.6.0] - 2025-10-22
 
 ### Added
 
 - Implemented package manager detection: the script now automatically detects the available package manager (`apt`, `dnf`, `pacman`, or `zypper`) and loads tasks from the corresponding JSON file.
   - Note: Missing json files will be added at a later stage.
 - Updated task loading logic to support multi-distro setups and future expansion.
+
+---
 
 ## [0.5.0] - 2025-10-21
 
@@ -24,6 +67,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 - Refactored `run_all_tasks()` and `main()` to use loaded tasks for both interactive and automated modes.
+
+---
 
 ## [0.4.5] - 2025-10-10
 
@@ -43,6 +88,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Notification urgency bug fixed in the function run_all_tasks().
 - Tweak README to match sudoers entries with actual commands being run.
+
+---
 
 ## [0.4.4] - 2025-10-10
 
