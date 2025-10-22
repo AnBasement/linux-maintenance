@@ -18,10 +18,10 @@
     },
     {
         "name": "Remove unnecessary packages",
-        "description": "Remove packages that are no longer needed",
+        "description": "Remove packages that were automatically installed to satisfy dependencies and are no longer needed",
         "command": ["sudo", "apt", "autoremove", "-y"],
-        "auto_safe": true,
-        "risk_level": "low",
+        "auto_safe": false,
+        "risk_level": "medium",
         "requires_sudo": true
     },
     {

@@ -5,7 +5,7 @@
             "check_command": ["which", "flatpak"],
             "description": "Update all installed Flatpak applications",
             "command": ["flatpak", "update", "-y"],
-            "auto_safe": true,
+            "auto_safe": false,
             "risk_level": "medium",
             "requires_sudo": false
         },
@@ -14,7 +14,7 @@
             "check_command": ["which", "flatpak"],
             "description": "Remove unused Flatpak runtimes and extensions",
             "command": ["flatpak", "uninstall", "--unused", "-y"],
-            "auto_safe": true,
+            "auto_safe": false,
             "risk_level": "low",
             "requires_sudo": false
         },
@@ -23,7 +23,7 @@
             "check_command": ["which", "snap"],
             "description": "Update all installed Snap packages",
             "command": ["snap", "refresh"],
-            "auto_safe": true,
+            "auto_safe": false,
             "risk_level": "medium",
             "requires_sudo": false
         },

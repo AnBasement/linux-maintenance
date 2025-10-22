@@ -16,20 +16,25 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 - Added `check_command` fields to a handful of relevant tasks.
-  - `Check reboot required` and `Orphaned libraries` in `apt.json`.
-  - `Update file database` in `base.json`.
+  - "Check reboot required" and "Orphaned libraries" in `apt.json`.
+  - "Update file database" in `base.json`.
   - All tasks in `optional.json`.
+- Corrected `auto_safe` values to be more conservative for automated runs.
+  - Changed `auto_safe: false` for "Remove unnecessary packages" in `apt.json` (removes packages).
+  - Changed `auto_safe: false` for "Update Flatpak apps" in `optional.json` (updates packages).
+  - Changed `auto_safe: false` for "Remove unused Flatpak runtimes" in `optional.json` (removes runtimes).
+  - Changed `auto_safe: false` for "Update Snap packages" in `optional.json` (updates packages).
 
 ### Removed
 
 - Removing some shell-dependent commands from JSON for now.
-  - `Leftover configs`, `Purge leftover configs` from `apt.json`.
-  - `Check user cache size`, `Clear thumbnail cache` from `base.json`.
-  - `Remove old snap revisions` from `optional.json`.
+  - "Leftover configs", "Purge leftover configs" from `apt.json`.
+  - "Check user cache size", "Clear thumbnail cache" from `base.json`.
+  - "Remove old snap revisions" from `optional.json`.
 
 ### Fixed
 
-- Fixing some sudo inconsistencies for `vacuum system logs` and `update file database` tasks in `base.json`.
+- Fixing some sudo inconsistencies for "Vacuum system logs" and "Update file database" tasks in `base.json`.
 
 ## [0.6.1] - 2025-10-22
 
