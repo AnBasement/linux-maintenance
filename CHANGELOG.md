@@ -6,13 +6,23 @@ All notable changes to the project will be documented here.
 The format is based on [Keep a Changelog v1.1.0](https://keepachangelog.com/en/1.1.0/),
 and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.6.0] - 2025-10-XX
+## [0.6.1] - 2025-10-22
+
+### Added
+
+- Implemented task validation for all tasks in JSON files. Checks required fields and correct types to prevent errors and task skipping.
+
+---
+
+## [0.6.0] - 2025-10-22
 
 ### Added
 
 - Implemented package manager detection: the script now automatically detects the available package manager (`apt`, `dnf`, `pacman`, or `zypper`) and loads tasks from the corresponding JSON file.
   - Note: Missing json files will be added at a later stage.
 - Updated task loading logic to support multi-distro setups and future expansion.
+
+---
 
 ## [0.5.0] - 2025-10-21
 
@@ -24,6 +34,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 - Refactored `run_all_tasks()` and `main()` to use loaded tasks for both interactive and automated modes.
+
+---
 
 ## [0.4.5] - 2025-10-10
 
@@ -43,6 +55,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Notification urgency bug fixed in the function run_all_tasks().
 - Tweak README to match sudoers entries with actual commands being run.
+
+---
 
 ## [0.4.4] - 2025-10-10
 
