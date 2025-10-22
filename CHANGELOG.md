@@ -24,6 +24,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - Changed `auto_safe: false` for "Update Flatpak apps" in `optional.json` (updates packages).
   - Changed `auto_safe: false` for "Remove unused Flatpak runtimes" in `optional.json` (removes runtimes).
   - Changed `auto_safe: false` for "Update Snap packages" in `optional.json` (updates packages).
+- Shortened description for task "Remove unnecessary packages" in `apt.json` to improve rich table display.
 
 ### Removed
 
