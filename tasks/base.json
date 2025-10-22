@@ -10,6 +10,7 @@
     },
     {
         "name": "Update file database",
+        "check_command": ["which", "updatedb"],
         "description": "Update the file name database",
         "command": ["sudo", "updatedb"],
         "auto_safe": true,

@@ -58,6 +58,7 @@
     },
     {
         "name": "Check reboot required",
+        "check_command": ["which", "needrestart"],
         "description": "Display what needs restarting after updates",
         "command": ["sudo", "needrestart", "-r", "l"],
         "auto_safe": false,
@@ -66,6 +67,7 @@
     },
     {
         "name": "Orphaned libraries",
+        "check_command": ["which", "deborphan"],
         "description": "Find orphaned libraries",
         "command": ["sudo", "deborphan"],
         "auto_safe": false,

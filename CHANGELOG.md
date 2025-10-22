@@ -13,6 +13,13 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added a check for `requires_sudo` to `run_all_tasks()` and `main()`.
   - If `requires_sudo` is `true` in `run_all_tasks()`, the task is skipped. In `main()`, the user is prompted to rerun command with sudo.
 
+### Changed
+
+- Added `check_command` fields to a handful of relevant tasks.
+  - `Check reboot required` and `Orphaned libraries` in `apt.json`.
+  - `Update file database` in `base.json`.
+  - All tasks in `optional.json`.
+
 ### Removed
 
 - Removing some shell-dependent commands from JSON for now.
