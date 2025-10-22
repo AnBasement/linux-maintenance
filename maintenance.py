@@ -65,50 +65,6 @@ notifier = DesktopNotifier(app_name="Linux Maintenance")
 # Script that provides reminders to perform certain regular maintenance
 # tasks on a Linux distribution.
 
-# Create table to display maintenance tasks
-table = Table(title="Linux Maintenance")
-
-# Add columns for task name, description and command
-table.add_column("No.", justify="center", no_wrap=True)
-table.add_column("Task", justify="center", no_wrap=True)
-table.add_column("Description", justify="center", no_wrap=True)
-table.add_column("Command", justify="center", no_wrap=True)
-
-# Add rows for the various tasks
-table.add_row(
-    "1",
-    "Update package lists",
-    "Fetches the latest information about available packages and updates.",
-    "sudo apt update",
-)
-table.add_row(
-    "2",
-    "Upgrade packages",
-    "Installs newer versions of all currently installed packages.",
-    "sudo apt upgrade -y",
-)
-table.add_row(
-    "3",
-    "Remove unused packages",
-    (
-        "Cleans up packages that were automatically installed and are no "
-        "longer required"
-    ),
-    "sudo apt autoremove -y",
-)
-table.add_row(
-    "4",
-    "Clean apt cache",
-    "Frees up disk space by deleting cached package files.",
-    "sudo apt autoclean -y",
-)
-table.add_row(
-    "5",
-    "List available updates",
-    "Shows packages that can be updated (safe read-only check).",
-    "apt list --upgradable",
-)
-
 
 def summarize_update_output(output: str) -> str:
     lines = output.splitlines()
@@ -422,7 +378,6 @@ def main() -> None:
         menu_table.add_row(
             str(idx), task["name"], task["description"], " ".join(task["command"])
         )
-
     print(menu_table)
     first_run = True
 

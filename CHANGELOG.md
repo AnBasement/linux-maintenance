@@ -31,6 +31,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - "Leftover configs", "Purge leftover configs" from `apt.json`.
   - "Check user cache size", "Clear thumbnail cache" from `base.json`.
   - "Remove old snap revisions" from `optional.json`.
+- Removed old code for a table that is no longer in use.
 
 ### Fixed
 
