@@ -33,14 +33,6 @@
             "requires_sudo": false
         },
         {
-            "name": "Remove old snap revisions",
-            "description": "Remove old revisions of Snap packages, keeping the latest 2",
-            "command": ["snap", "remove", "$(snap", "list", "--all", "|", "awk", "'/disabled/{print $1, $3}')"],
-            "auto_safe": false,
-            "risk_level": "medium",
-            "requires_sudo": false
-        },
-        {
             "name": "Docker disk usage",
             "description": "Show Docker disk usage",
             "command": ["docker", "system", "df"],

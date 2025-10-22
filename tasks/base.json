@@ -33,28 +33,12 @@
         "requires_sudo": false
     },
     {
-        "name": "Check user cache size",
-        "description": "Display size of user cache directory",
-        "command": ["du", "-sh", "~/.cache"],
-        "auto_safe": false,
-        "risk_level": "low",
-        "requires_sudo": false
-    },
-    {
         "name": "Trim SSD",
         "description": "Perform filesystem trim on all mounted filesystems",
         "command": ["sudo", "fstrim", "-av"],
         "auto_safe": false,
         "risk_level": "medium",
         "requires_sudo": true
-    },
-    {
-        "name": "Clear thumbnail cache",
-        "description": "Remove all files in the thumbnail cache directory",
-        "command": ["rm", "-rf", "~/.cache/thumbnails/*"],
-        "auto_safe": false,
-        "risk_level": "medium",
-        "requires_sudo": false
     },
     {
         "name": "Aggressive log trimming",
