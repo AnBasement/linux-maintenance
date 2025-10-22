@@ -150,13 +150,23 @@ def send_notification(title, message, urgency=Urgency.Normal):
 
 def load_tasks_from_json(file_path: Path) -> list[dict]:
     """Load tasks from a JSON file."""
-
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-            tasks = data.get("tasks", [])
-            logger.info(f"Loaded {len(tasks)} tasks from {file_path}")
-            return tasks
+            raw_tasks = data.get('tasks', [])
+
+            valid_tasks = []
+            for idx, task in enumerate(raw_tasks):
+                is_valid, error_msg = validate_task(task)
+                if is_valid:
+                    valid_tasks.append(task)
+                else:
+                    logger.error(f"Invalid task at index {idx} in {file_path.name}: {error_msg}")
+                    logger.debug(f"Problematic task data: {task}")
+
+            logger.info(f"Loaded {len(valid_tasks)}/{len(raw_tasks)} valid tasks from {file_path.name}")
+            return valid_tasks
+
     except FileNotFoundError:
         logger.warning(f"Task file not found: {file_path}")
         return []
@@ -211,6 +221,49 @@ def detect_package_manager() -> str | None:
 
     logger.warning("No supported package manager detected")
     return None
+
+
+def validate_task(task: dict) -> tuple[bool, str]:
+    """
+    Validate that a task has all required fields with correct types.
+
+    Returns:
+        (is_valid, error_message)
+    """
+    required_fields = ['name', 'description', 'command']
+    for field in required_fields:
+        if field not in task:
+            return (False, f"Missing required field: {field}")
+
+    if not isinstance(task['name'], str) or not task['name'].strip():
+        return (False, "Field 'name' must be a non-empty string")
+
+    if not isinstance(task['description'], str) or not task['description'].strip():
+        return (False, "Field 'description' must be a non-empty string")
+
+    if not isinstance(task['command'], list) or len(task['command']) == 0:
+        return (False, "Field 'command' must be a non-empty list")
+
+    for idx, item in enumerate(task['command']):
+        if not isinstance(item, str):
+            return (False, f"Command item at index {idx} must be a string, got {type(item).__name__}")
+
+    if 'auto_safe' in task and not isinstance(task['auto_safe'], bool):
+        return (False, "Field 'auto_safe' must be a boolean")
+
+    if 'requires_sudo' in task and not isinstance(task['requires_sudo'], bool):
+        return (False, "Field 'requires_sudo' must be a boolean")
+
+    if 'risk_level' in task:
+        valid_levels = ['low', 'medium', 'high']
+        if task['risk_level'] not in valid_levels:
+            return (False, f"Field 'risk_level' must be one of {valid_levels}")
+
+    if 'check_command' in task:
+        if not isinstance(task['check_command'], list):
+            return (False, "Field 'check_command' must be a list")
+
+    return (True, "")
 
 
 def run_command(cmd: list[str]) -> tuple[int, str, str]:
