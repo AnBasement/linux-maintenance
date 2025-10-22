@@ -176,14 +176,41 @@ def load_all_tasks() -> list[dict]:
     base_tasks = load_tasks_from_json(tasks_dir / "base.json")
     all_tasks.extend(base_tasks)
 
-    apt_tasks = load_tasks_from_json(tasks_dir / "apt.json")
-    all_tasks.extend(apt_tasks)
+    pkg_manager = detect_package_manager()
+    if pkg_manager:
+        pkg_tasks_file = tasks_dir / f"{pkg_manager}.json"
+        if pkg_tasks_file.exists():
+            pkg_tasks = load_tasks_from_json(pkg_tasks_file)
+            all_tasks.extend(pkg_tasks)
+            logger.info(f"Loaded {len(pkg_tasks)} {pkg_manager} tasks")
 
     optional_tasks = load_tasks_from_json(tasks_dir / "optional.json")
     all_tasks.extend(optional_tasks)
-
+    
     logger.info(f"Total tasks loaded: {len(all_tasks)}")
     return all_tasks
+
+
+def detect_package_manager() -> str | None:
+    """Detect which package manager is available."""
+    managers = {
+        "apt": ["apt", "--version"],
+        "dnf": ["dnf", "--version"],
+        "pacman": ["pacman", "--version"],
+        "zypper": ["zypper", "--version"]
+    }
+
+    for name, check_cmd in managers.items():
+        try:
+            result = subprocess.run(check_cmd, capture_output=True, text=True, timeout=5)
+            if result.returncode == 0:
+                logger.info(f"Detected package manager: {name}")
+                return name
+        except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+            continue
+
+    logger.warning("No supported package manager detected")
+    return None
 
 
 def run_command(cmd: list[str]) -> tuple[int, str, str]:
