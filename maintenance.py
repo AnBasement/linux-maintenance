@@ -12,6 +12,7 @@ from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 import argparse
 import json
+import os
 
 # Setup argument parser
 version_file = Path(__file__).parent / "VERSION"
@@ -328,6 +329,17 @@ def run_all_tasks() -> None:
             task_name = task["name"]
             command_list = task["command"]
 
+            # Sudo check
+            requires_sudo = task.get('requires_sudo', False)
+
+            if requires_sudo and os.geteuid() != 0:
+                logger.warning(f"Task '{task_name}' requires sudo but not running as root")
+                print(Panel.fit(
+                    f"[red]Task '{task_name}' requires sudo but script is not running as root.[/red]",
+                    border_style="red"
+                ))
+                continue
+
             status.update(f"Task {task_counter} of {len(auto_tasks)}: {task_name}")
             logger.info(f"Running task {task_counter}/{len(auto_tasks)}: {task_name}")
 
@@ -436,6 +448,16 @@ def main() -> None:
             choice_num = int(selection)
             if 1 <= choice_num <= max_choice:
                 task = all_tasks[choice_num - 1]
+                requires_sudo = task.get('requires_sudo', False)
+
+                if requires_sudo and os.geteuid() != 0:
+                    logger.warning(f"Task '{task['name']}' requires sudo but not running as root")
+                    print(Panel.fit(
+                        f"[red]Task '{task['name']}' requires sudo but script is not running as root.[/red]",
+                        border_style="red"
+                    ))
+                    return
+
                 exit_code, output, error = run_command(task["command"])
 
                 # Summarize output
