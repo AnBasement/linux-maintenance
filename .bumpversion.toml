@@ -4,9 +4,6 @@ parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
 serialize = ["{major}.{minor}.{patch}"]
 search = "{current_version}"
 replace = "{new_version}"
-regex = false
-ignore_missing_version = false
-ignore_missing_files = false
 tag = true
 sign_tags = false
 tag_name = "v{new_version}"
@@ -16,31 +13,12 @@ commit = true
 message = "Bump version: {current_version} → {new_version}"
 commit_args = ""
 
-# Add files that contain version numbers
-# Adjust these based on your project structure
-
-[[tool.bumpversion.files]]
-filename = "VERSION"
-
 [[tool.bumpversion.files]]
 filename = "maintenance.py"
 search = "__version__ = \"{current_version}\""
 replace = "__version__ = \"{new_version}\""
 
-# If you have a setup.py or pyproject.toml with version
-# [[tool.bumpversion.files]]
-# filename = "setup.py"
-# search = "version=\"{current_version}\""
-# replace = "version=\"{new_version}\""
-
-# If you have a main script with __version__
-# [[tool.bumpversion.files]]
-# filename = "your_tool.sh"
-# search = "VERSION=\"{current_version}\""
-# replace = "VERSION=\"{new_version}\""
-
-# If you have a README with version badge
-# [[tool.bumpversion.files]]
-# filename = "README.md"
-# search = "version-{current_version}"
-# replace = "version-{new_version}"
+[[tool.bumpversion.files]]
+filename = "CHANGELOG.md"
+search = "## [Unreleased]"
+replace = "## [Unreleased]\n\n## [{new_version}] - {now:%Y-%m-%d}"
