@@ -8,6 +8,13 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Add support for custom auto-run tasks list via `user_auto.json`.
+  - Overrides default auto_safe behavior when user_auto.json exists.
+  - Tasks in user list that don't exist are warned about in the logs.
+  - An example user_auto.json format is included, only needs the "Name" of the tasks to run.
+
 ## [0.7.0] - 2025-10-23
 
 ### Added
