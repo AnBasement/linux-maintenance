@@ -56,7 +56,7 @@ if not any(isinstance(h, TimedRotatingFileHandler) for h in logger.handlers):
 
 logger.propagate = False
 
-__version__ = "0.6.2"
+__version__ = "0.8.0"
 
 console = Console()
 
@@ -108,9 +108,9 @@ def send_notification(title, message, urgency=Urgency.Normal):
 def load_tasks_from_json(file_path: Path) -> list[dict]:
     """Load tasks from a JSON file."""
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             data = json.load(f)
-            raw_tasks = data.get('tasks', [])
+            raw_tasks = data.get("tasks", [])
 
             valid_tasks = []
             for idx, task in enumerate(raw_tasks):
@@ -118,10 +118,14 @@ def load_tasks_from_json(file_path: Path) -> list[dict]:
                 if is_valid:
                     valid_tasks.append(task)
                 else:
-                    logger.error(f"Invalid task at index {idx} in {file_path.name}: {error_msg}")
+                    logger.error(
+                        f"Invalid task at index {idx} in {file_path.name}: {error_msg}"
+                    )
                     logger.debug(f"Problematic task data: {task}")
 
-            logger.info(f"Loaded {len(valid_tasks)}/{len(raw_tasks)} valid tasks from {file_path.name}")
+            logger.info(
+                f"Loaded {len(valid_tasks)}/{len(raw_tasks)} valid tasks from {file_path.name}"
+            )
             return valid_tasks
 
     except FileNotFoundError:
@@ -140,22 +144,56 @@ def load_all_tasks() -> list[dict]:
     tasks_dir = Path(__file__).parent / "tasks"
     all_tasks = []
 
-    base_tasks = load_tasks_from_json(tasks_dir / "base.json")
+    base_tasks_raw = load_tasks_from_json(tasks_dir / "base.json")
+    base_tasks = filter_optional_tasks(base_tasks_raw)
     all_tasks.extend(base_tasks)
+    logger.info(f"Included {len(base_tasks)} base tasks")
 
     pkg_manager = detect_package_manager()
     if pkg_manager:
         pkg_tasks_file = tasks_dir / f"{pkg_manager}.json"
         if pkg_tasks_file.exists():
-            pkg_tasks = load_tasks_from_json(pkg_tasks_file)
+            pkg_tasks_raw = load_tasks_from_json(pkg_tasks_file)
+            pkg_tasks = filter_optional_tasks(pkg_tasks_raw)
             all_tasks.extend(pkg_tasks)
-            logger.info(f"Loaded {len(pkg_tasks)} {pkg_manager} tasks")
+            logger.info(f"Included {len(pkg_tasks)} {pkg_manager} tasks")
+    else:
+        logger.warning("No supported package manager detected")
 
-    optional_tasks = load_tasks_from_json(tasks_dir / "optional.json")
+    optional_tasks_raw = load_tasks_from_json(tasks_dir / "optional.json")
+    optional_tasks = filter_optional_tasks(optional_tasks_raw)
     all_tasks.extend(optional_tasks)
-    
+    logger.info(f"Included {len(optional_tasks)} optional tasks")
+
     logger.info(f"Total tasks loaded: {len(all_tasks)}")
     return all_tasks
+
+
+def load_user_auto_tasks() -> list[str] | None:
+    """Load user's custom auto-run task list."""
+    user_file = Path(__file__).parent / "tasks" / "user_auto.json"
+
+    if not user_file.exists():
+        return None
+
+    try:
+        with open(user_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            auto_tasks = data.get("auto_tasks", [])
+
+            if not isinstance(auto_tasks, list):
+                logger.error("user_auto.json: 'auto_tasks' must be a list")
+                return None
+
+            logger.info(f"Loaded user customization: {len(auto_tasks)} task names")
+            return auto_tasks
+
+    except json.JSONDecodeError as e:
+        logger.error(f"Invalid JSON in user_auto.json: {e}")
+        return None
+    except Exception as e:
+        logger.error(f"Error loading user_auto.json: {e}")
+        return None
 
 
 def detect_package_manager() -> str | None:
@@ -164,16 +202,22 @@ def detect_package_manager() -> str | None:
         "apt": ["apt", "--version"],
         "dnf": ["dnf", "--version"],
         "pacman": ["pacman", "--version"],
-        "zypper": ["zypper", "--version"]
+        "zypper": ["zypper", "--version"],
     }
 
     for name, check_cmd in managers.items():
         try:
-            result = subprocess.run(check_cmd, capture_output=True, text=True, timeout=5)
+            result = subprocess.run(
+                check_cmd, capture_output=True, text=True, timeout=5
+            )
             if result.returncode == 0:
                 logger.info(f"Detected package manager: {name}")
                 return name
-        except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+        except (
+            subprocess.CalledProcessError,
+            FileNotFoundError,
+            subprocess.TimeoutExpired,
+        ):
             continue
 
     logger.warning("No supported package manager detected")
@@ -187,40 +231,87 @@ def validate_task(task: dict) -> tuple[bool, str]:
     Returns:
         (is_valid, error_message)
     """
-    required_fields = ['name', 'description', 'command']
+    required_fields = ["name", "description", "command"]
     for field in required_fields:
         if field not in task:
             return (False, f"Missing required field: {field}")
 
-    if not isinstance(task['name'], str) or not task['name'].strip():
+    if not isinstance(task["name"], str) or not task["name"].strip():
         return (False, "Field 'name' must be a non-empty string")
 
-    if not isinstance(task['description'], str) or not task['description'].strip():
+    if not isinstance(task["description"], str) or not task["description"].strip():
         return (False, "Field 'description' must be a non-empty string")
 
-    if not isinstance(task['command'], list) or len(task['command']) == 0:
+    if not isinstance(task["command"], list) or len(task["command"]) == 0:
         return (False, "Field 'command' must be a non-empty list")
 
-    for idx, item in enumerate(task['command']):
+    for idx, item in enumerate(task["command"]):
         if not isinstance(item, str):
-            return (False, f"Command item at index {idx} must be a string, got {type(item).__name__}")
+            return (
+                False,
+                f"Command item at index {idx} must be a string, got {type(item).__name__}",
+            )
 
-    if 'auto_safe' in task and not isinstance(task['auto_safe'], bool):
+    if "auto_safe" in task and not isinstance(task["auto_safe"], bool):
         return (False, "Field 'auto_safe' must be a boolean")
 
-    if 'requires_sudo' in task and not isinstance(task['requires_sudo'], bool):
+    if "requires_sudo" in task and not isinstance(task["requires_sudo"], bool):
         return (False, "Field 'requires_sudo' must be a boolean")
 
-    if 'risk_level' in task:
-        valid_levels = ['low', 'medium', 'high']
-        if task['risk_level'] not in valid_levels:
+    if "risk_level" in task:
+        valid_levels = ["low", "medium", "high"]
+        if task["risk_level"] not in valid_levels:
             return (False, f"Field 'risk_level' must be one of {valid_levels}")
 
-    if 'check_command' in task:
-        if not isinstance(task['check_command'], list):
+    if "check_command" in task:
+        if not isinstance(task["check_command"], list):
             return (False, "Field 'check_command' must be a list")
 
     return (True, "")
+
+
+def check_command_exists(command: str) -> bool:
+    """Check if a command exists on the user's system."""
+    try:
+        result = subprocess.run(
+            ["which", command], capture_output=True, text=True, timeout=2
+        )
+        return result.returncode == 0
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        return False
+    except Exception as e:
+        logger.debug(f"Error checking command '{command}': {e}")
+        return False
+
+
+def filter_optional_tasks(tasks: list[dict]) -> list[dict]:
+    """Filter tasks based on check_command field."""
+    filtered = []
+
+    for task in tasks:
+        check_cmd = task.get("check_command")
+
+        if not check_cmd:
+            filtered.append(task)
+            continue
+
+        if isinstance(check_cmd, list) and len(check_cmd) >= 2:
+            command_name = check_cmd[1]
+        else:
+            logger.warning(
+                f"Invalid check_command format for task '{task.get('name', 'unknown')}': {check_cmd}"
+            )
+            continue
+
+        if check_command_exists(command_name):
+            logger.info(
+                f"Including task '{task['name']}' ({command_name} is available)"
+            )
+            filtered.append(task)
+        else:
+            logger.debug(f"Skipping task '{task['name']}' ({command_name} not found)")
+
+    return filtered
 
 
 def run_command(cmd: list[str]) -> tuple[int, str, str]:
@@ -265,10 +356,26 @@ def run_all_tasks() -> None:
         )
         return
 
-    auto_tasks = [task for task in all_tasks if task.get("auto_safe", False)]
+    user_auto_list = load_user_auto_tasks()
+
+    if user_auto_list:
+        auto_tasks = [task for task in all_tasks if task["name"] in user_auto_list]
+        logger.info(
+            f"Using user customization: {len(auto_tasks)} tasks from user_auto.json"
+        )
+
+        found_names = {task["name"] for task in auto_tasks}
+        for name in user_auto_list:
+            if name not in found_names:
+                logger.warning(
+                    f"Task '{name}' in user_auto.json not found in loaded tasks"
+                )
+    else:
+        auto_tasks = [task for task in all_tasks if task.get("auto_safe", False)]
+        logger.info(f"Using default auto_safe: {len(auto_tasks)} tasks")
 
     if not auto_tasks:
-        logger.warning("No auto-safe tasks found")
+        logger.warning("No tasks selected for automated run")
         return
 
     logger.info(f"Starting automated run with {len(auto_tasks)} tasks")
@@ -286,14 +393,18 @@ def run_all_tasks() -> None:
             command_list = task["command"]
 
             # Sudo check
-            requires_sudo = task.get('requires_sudo', False)
+            requires_sudo = task.get("requires_sudo", False)
 
             if requires_sudo and os.geteuid() != 0:
-                logger.warning(f"Task '{task_name}' requires sudo but not running as root")
-                print(Panel.fit(
-                    f"[red]Task '{task_name}' requires sudo but script is not running as root.[/red]",
-                    border_style="red"
-                ))
+                logger.warning(
+                    f"Task '{task_name}' requires sudo but not running as root"
+                )
+                print(
+                    Panel.fit(
+                        f"[red]Task '{task_name}' requires sudo but script is not running as root.[/red]",
+                        border_style="red",
+                    )
+                )
                 continue
 
             status.update(f"Task {task_counter} of {len(auto_tasks)}: {task_name}")
@@ -403,18 +514,26 @@ def main() -> None:
             choice_num = int(selection)
             if 1 <= choice_num <= max_choice:
                 task = all_tasks[choice_num - 1]
-                requires_sudo = task.get('requires_sudo', False)
+                requires_sudo = task.get("requires_sudo", False)
 
                 if requires_sudo and os.geteuid() != 0:
-                    logger.warning(f"Task '{task['name']}' requires sudo but not running as root")
-                    print(Panel.fit(
-                        f"[yellow]Task '{task['name']}' requires sudo. "
-                        "Would you like to rerun this command with sudo? (y/n)[/yellow]",
-                        border_style="yellow"
-                    ))
+                    logger.warning(
+                        f"Task '{task['name']}' requires sudo but not running as root"
+                    )
+                    print(
+                        Panel.fit(
+                            f"[yellow]Task '{task['name']}' requires sudo. "
+                            "Would you like to rerun this command with sudo? (y/n)[/yellow]",
+                            border_style="yellow",
+                        )
+                    )
                     resp = input("Run with sudo? [y/N]: ").strip().lower()
                     if resp == "y":
-                        cmd_with_sudo = ["sudo"] + task["command"] if task["command"][0] != "sudo" else task["command"]
+                        cmd_with_sudo = (
+                            task["command"]
+                            if task["command"] and task["command"][0] == "sudo"
+                            else ["sudo"] + task["command"]
+                        )
                         exit_code, output, error = run_command(cmd_with_sudo)
                     else:
                         print(Panel.fit("[red]Task skipped.[/red]", border_style="red"))

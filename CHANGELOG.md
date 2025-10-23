@@ -6,6 +6,37 @@ All notable changes to the project will be documented here.
 The format is based on [Keep a Changelog v1.1.0](https://keepachangelog.com/en/1.1.0/),
 and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [0.8.0] - 2025-10-23
+
+### Added
+
+- Add support for custom auto-run tasks list via `user_auto.json`.
+  - Overrides default auto_safe behavior when user_auto.json exists.
+  - Tasks in user list that don't exist are warned about in the logs.
+  - An example user_auto.json format is included, only needs the "Name" of the tasks to run.
+
+## [0.7.0] - 2025-10-23
+
+### Added
+
+- Added filtering of tasks based on available package managers on the user's system.
+  - Add `check_command_exists()` to detect available commands.
+  - Add `filter_optional_tasks()` to skip tasks for missing tools.
+  - Update `load_all_tasks()` to filter base, package manager, and optional tasks.
+  - Supports Flatpak, Snap, Docker and other optional package managers.
+
+### Changed
+
+- Some code cleanup for standardization.
+
+### Fixed
+
+- Sudo condition check no longer adds a second "sudo", instead checking if one is present in the command first.
+
+---
+
 ## [0.6.2] - 2025-10-22
 
 ### Added
@@ -131,6 +162,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Fixed duplicated log entries; cleaned up command success/error logging.
 
+---
+
 ## [0.4.0] - 2025-10-08
 
 ### Added
@@ -230,7 +263,9 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Automated bump script for patch/minor/major releases
 - VERSION file for version tracking
 
-## [0.1] - 2025-10-04
+---
+
+## [0.0.1] - 2025-10-04
 
 ### Features
 
