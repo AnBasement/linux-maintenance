@@ -140,20 +140,27 @@ def load_all_tasks() -> list[dict]:
     tasks_dir = Path(__file__).parent / "tasks"
     all_tasks = []
 
-    base_tasks = load_tasks_from_json(tasks_dir / "base.json")
+    base_tasks_raw = load_tasks_from_json(tasks_dir / "base.json")
+    base_tasks = filter_optional_tasks(base_tasks_raw)
     all_tasks.extend(base_tasks)
+    logger.info(f"Included {len(base_tasks)} base tasks")
 
     pkg_manager = detect_package_manager()
     if pkg_manager:
         pkg_tasks_file = tasks_dir / f"{pkg_manager}.json"
         if pkg_tasks_file.exists():
-            pkg_tasks = load_tasks_from_json(pkg_tasks_file)
+            pkg_tasks_raw = load_tasks_from_json(pkg_tasks_file)
+            pkg_tasks = filter_optional_tasks(pkg_tasks_raw)
             all_tasks.extend(pkg_tasks)
-            logger.info(f"Loaded {len(pkg_tasks)} {pkg_manager} tasks")
+            logger.info(f"Included {len(pkg_tasks)} {pkg_manager} tasks")
+    else:
+        logger.warning("No supported package manager detected")
 
-    optional_tasks = load_tasks_from_json(tasks_dir / "optional.json")
+    optional_tasks_raw = load_tasks_from_json(tasks_dir / "optional.json")
+    optional_tasks = filter_optional_tasks(optional_tasks_raw)
     all_tasks.extend(optional_tasks)
-    
+    logger.info(f"Included {len(optional_tasks)} optional tasks")
+
     logger.info(f"Total tasks loaded: {len(all_tasks)}")
     return all_tasks
 
@@ -221,6 +228,49 @@ def validate_task(task: dict) -> tuple[bool, str]:
             return (False, "Field 'check_command' must be a list")
 
     return (True, "")
+
+
+def check_command_exists(command: str) -> bool:
+    """Check if a command exists on the user's system."""
+    try:
+        result = subprocess.run(
+            ["which", command],
+            capture_output=True,
+            text=True,
+            timeout=2
+        )
+        return result.returncode == 0
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        return False
+    except Exception as e:
+        logger.debug(f"Error checking command '{command}': {e}")
+        return False
+    
+
+def filter_optional_tasks(tasks: list[dict]) -> list[dict]:
+    """Filter tasks based on check_command field."""
+    filtered = []
+
+    for task in tasks:
+        check_cmd = task.get('check_command')
+
+        if not check_cmd:
+            filtered.append(task)
+            continue
+
+        if isinstance(check_cmd, list) and len(check_cmd) >= 2:
+            command_name = check_cmd[1]
+        else:
+            logger.warning(f"Invalid check_command format for task '{task.get('name', 'unknown')}': {check_cmd}")
+            continue
+
+        if check_command_exists(command_name):
+            logger.info(f"Including task '{task['name']}' ({command_name} is available)")
+            filtered.append(task)
+        else:
+            logger.debug(f"Skipping task '{task['name']}' ({command_name} not found)")
+
+    return filtered
 
 
 def run_command(cmd: list[str]) -> tuple[int, str, str]:
