@@ -169,6 +169,33 @@ def load_all_tasks() -> list[dict]:
     return all_tasks
 
 
+def load_user_auto_tasks() -> list[str] | None:
+    """Load user's custom auto-run task list."""
+    user_file = Path(__file__).parent / "tasks" / "user_auto.json"
+
+    if not user_file.exists():
+        return None
+
+    try:
+        with open(user_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            auto_tasks = data.get("auto_tasks", [])
+
+            if not isinstance(auto_tasks, list):
+                logger.error("user_auto.json: 'auto_tasks' must be a list")
+                return None
+
+            logger.info(f"Loaded user customization: {len(auto_tasks)} task names")
+            return auto_tasks
+
+    except json.JSONDecodeError as e:
+        logger.error(f"Invalid JSON in user_auto.json: {e}")
+        return None
+    except Exception as e:
+        logger.error(f"Error loading user_auto.json: {e}")
+        return None
+
+
 def detect_package_manager() -> str | None:
     """Detect which package manager is available."""
     managers = {
@@ -329,10 +356,26 @@ def run_all_tasks() -> None:
         )
         return
 
-    auto_tasks = [task for task in all_tasks if task.get("auto_safe", False)]
+    user_auto_list = load_user_auto_tasks()
+
+    if user_auto_list:
+        auto_tasks = [task for task in all_tasks if task["name"] in user_auto_list]
+        logger.info(
+            f"Using user customization: {len(auto_tasks)} tasks from user_auto.json"
+        )
+
+        found_names = {task["name"] for task in auto_tasks}
+        for name in user_auto_list:
+            if name not in found_names:
+                logger.warning(
+                    f"Task '{name}' in user_auto.json not found in loaded tasks"
+                )
+    else:
+        auto_tasks = [task for task in all_tasks if task.get("auto_safe", False)]
+        logger.info(f"Using default auto_safe: {len(auto_tasks)} tasks")
 
     if not auto_tasks:
-        logger.warning("No auto-safe tasks found")
+        logger.warning("No tasks selected for automated run")
         return
 
     logger.info(f"Starting automated run with {len(auto_tasks)} tasks")

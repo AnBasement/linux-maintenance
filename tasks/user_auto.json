@@ -1,0 +1,8 @@
+{
+  "auto_tasks": [
+    "Update package lists",
+    "Remove unnecessary packages",
+    "Vacuum system logs",
+    "Update Flatpak apps"
+  ]
+}
