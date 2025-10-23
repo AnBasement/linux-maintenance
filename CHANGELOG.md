@@ -8,6 +8,14 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Added filtering of tasks based on available package managers on the user's system.
+
+### Changed
+
+- Some code cleanup for standardization.
+
 ### Fixed
 
 - Sudo condition check no longer adds a second "sudo", instead checking if one is present in the command first.
