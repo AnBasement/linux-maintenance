@@ -13,6 +13,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 
 - Added filtering of tasks based on available package managers on the user's system.
+  - Add `check_command_exists()` to detect available commands.
+  - Add `filter_optional_tasks()` to skip tasks for missing tools.
+  - Update `load_all_tasks()` to filter base, package manager, and optional tasks.
+  - Supports Flatpak, Snap, Docker and other optional package managers.
 
 ### Changed
 
