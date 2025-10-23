@@ -8,6 +8,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.7.0] - 2025-10-23
+
 ### Added
 
 - Added filtering of tasks based on available package managers on the user's system.
