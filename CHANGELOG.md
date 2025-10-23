@@ -8,6 +8,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.8.1] - 2025-10-23
+
 ### Changed
 
 - Improved validation for check_command fields. Only tasks with a valid `['which', <command>]` format are included for optional tool filtering.
