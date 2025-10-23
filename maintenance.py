@@ -295,11 +295,17 @@ def filter_optional_tasks(tasks: list[dict]) -> list[dict]:
             filtered.append(task)
             continue
 
-        if isinstance(check_cmd, list) and len(check_cmd) >= 2:
+        if (
+            isinstance(check_cmd, list)
+            and len(check_cmd) == 2
+            and check_cmd[0] == "which"
+            and isinstance(check_cmd[1], str)
+            and check_cmd[1].strip()
+        ):
             command_name = check_cmd[1]
         else:
             logger.warning(
-                f"Invalid check_command format for task '{task.get('name', 'unknown')}': {check_cmd}"
+                f"Invalid check_command format for task '{task.get('name', 'unknown')}': {check_cmd}. Expected format: ['which', <command>]"
             )
             continue
 
@@ -531,7 +537,11 @@ def main() -> None:
                     if resp == "y":
                         cmd_with_sudo = (
                             task["command"]
-                            if task["command"] and task["command"][0] == "sudo"
+                            if (
+                                isinstance(task["command"], list)
+                                and len(task["command"]) > 0
+                                and task["command"][0] == "sudo"
+                            )
                             else ["sudo"] + task["command"]
                         )
                         exit_code, output, error = run_command(cmd_with_sudo)

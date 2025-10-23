@@ -8,6 +8,11 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- Improved validation for check_command fields. Only tasks with a valid `['which', <command>]` format are included for optional tool filtering.
+- Improved validation for `task["command"]` to ensure it is a non-empty list before checking for `sudo` as the first element.
+
 ## [0.8.0] - 2025-10-23
 
 ### Added
