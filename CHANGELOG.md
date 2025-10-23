@@ -8,6 +8,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.8.0] - 2025-10-23
+
 ### Added
 
 - Add support for custom auto-run tasks list via `user_auto.json`.
